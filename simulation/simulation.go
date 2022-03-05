@@ -3,27 +3,61 @@ package simulation
 import (
 	"errors"
 
+	"github.com/HenryGeorgist/go-wat/component"
 	"github.com/HenryGeorgist/go-wat/compute"
 )
 
 type Configuration interface {
-	ProgramOrder() compute.ProgramOrder
+	ProgramOrder() component.ProgramOrder
+	Models() []component.Model
 	InputSource() string
 	OutputDestination() string
 }
-type DeterministicCompute struct {
-	ProgramOrder      compute.ProgramOrder
+type DeterministicConfiguration struct {
+	programOrder      component.ProgramOrder
+	models            []component.Model
 	TimeWindow        compute.TimeWindow
-	OutputDestination string
-	InputSource       string
+	outputDestination string
+	inputSource       string
 }
+
+func (d DeterministicConfiguration) ProgramOrder() component.ProgramOrder {
+	return d.programOrder
+}
+func (d DeterministicConfiguration) Models() []component.Model {
+	return d.models
+}
+func (d DeterministicConfiguration) InputSource() string {
+	return d.inputSource
+}
+func (d DeterministicConfiguration) OutputDestination() string {
+	return d.outputDestination
+}
+
 type StochasticConfiguration struct {
-	ProgramOrder           compute.ProgramOrder
-	LifecycleTimeWindow    compute.TimeWindow
-	InitialRealizationSeed int64
-	InitialEventSeed       int64
-	OutputDestination      string
-	InputSource            string
+	programOrder             component.ProgramOrder
+	models                   []component.Model
+	EventGenerator           component.EventGenerator
+	LifecycleTimeWindow      compute.TimeWindow
+	TotalRealizations        int
+	LifecyclesPerRealization int
+	InitialRealizationSeed   int64
+	InitialEventSeed         int64
+	outputDestination        string
+	inputSource              string
+}
+
+func (s StochasticConfiguration) ProgramOrder() component.ProgramOrder {
+	return s.programOrder
+}
+func (s StochasticConfiguration) Models() []component.Model {
+	return s.models
+}
+func (s StochasticConfiguration) InputSource() string {
+	return s.inputSource
+}
+func (s StochasticConfiguration) OutputDestination() string {
+	return s.outputDestination
 }
 
 func Compute(config Configuration) error {
@@ -31,23 +65,33 @@ func Compute(config Configuration) error {
 	var coptions compute.ComputeOptions
 	if ok {
 		//loop for realizations
-		//loop for lifecycles
-		//loop for events
+		for realization := 0; realization < stochastic.TotalRealizations; realization++ {
+			//loop for lifecycles
+			for lifecycle := 0; lifecycle < stochastic.LifecyclesPerRealization; lifecycle++ {
+				//loop for events
+				//event generator create events
+				events := stochastic.EventGenerator.GenerateTimeWindows()
+				for eventid, event := range events {
+					seo := compute.StochasticEventOptions{
+						RealizationNumber: realization,
+						LifecycleNumber:   lifecycle,
+						EventNumber:       eventid,
+						RealizationSeed:   stochastic.InitialRealizationSeed,
+						EventSeed:         stochastic.InitialEventSeed,
+						TimeWindow:        event,
+					}
+					coptions = compute.ComputeOptions{
+						InputSource:       config.InputSource(),
+						OutputDestination: config.OutputDestination(),
+						EventOptions:      seo,
+					}
+					computeEvent(config, coptions)
+				}
 
-		seo := compute.StochasticEventOptions{
-			RealizationNumber: 1,
-			LifecycleNumber:   1,
-			EventNumber:       1,
-			RealizationSeed:   stochastic.InitialRealizationSeed,
-			EventSeed:         stochastic.InitialEventSeed,
-			TimeWindow:        stochastic.LifecycleTimeWindow,
+			}
+
 		}
-		coptions = compute.ComputeOptions{
-			InputSource:       config.InputSource(),
-			OutputDestination: config.OutputDestination(),
-			EventOptions:      seo,
-		}
-		computeEvent(config, coptions)
+
 	} else {
 		//assume deterministic
 		deterministic, _ := config.(DeterministicConfiguration)
@@ -64,8 +108,8 @@ func Compute(config Configuration) error {
 	return errors.New("something bad happened")
 }
 func computeEvent(config Configuration, options compute.ComputeOptions) error {
-	for _, p := range config.ProgramOrder().Plugins {
-		err := p.Compute(options)
+	for idx, p := range config.ProgramOrder().Plugins {
+		err := p.Compute(config.Models()[idx], options)
 		if err != nil {
 			return err
 		}

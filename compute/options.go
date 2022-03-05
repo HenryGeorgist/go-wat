@@ -12,9 +12,9 @@ type TimeWindow struct {
 
 type StochasticEventOptions struct {
 	TimeWindow        TimeWindow
-	RealizationNumber int64
-	LifecycleNumber   int64
-	EventNumber       int64
+	RealizationNumber int
+	LifecycleNumber   int
+	EventNumber       int
 	EventSeed         int64
 	RealizationSeed   int64
 }

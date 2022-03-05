@@ -2,6 +2,7 @@ package simulation
 
 import (
 	"errors"
+	"math/rand"
 
 	"github.com/HenryGeorgist/go-wat/component"
 	"github.com/HenryGeorgist/go-wat/compute"
@@ -65,19 +66,23 @@ func Compute(config Configuration) error {
 	var coptions compute.ComputeOptions
 	if ok {
 		//loop for realizations
+		eventRandom := rand.NewSource(stochastic.InitialEventSeed)
+		realizationRandom := rand.NewSource(stochastic.InitialRealizationSeed)
 		for realization := 0; realization < stochastic.TotalRealizations; realization++ {
 			//loop for lifecycles
+			realizationSeed := realizationRandom.Int63() //probably make one per model
 			for lifecycle := 0; lifecycle < stochastic.LifecyclesPerRealization; lifecycle++ {
 				//loop for events
 				//event generator create events
 				events := stochastic.EventGenerator.GenerateTimeWindows()
 				for eventid, event := range events {
+					eventSeed := eventRandom.Int63() //probably make one per model
 					seo := compute.StochasticEventOptions{
 						RealizationNumber: realization,
 						LifecycleNumber:   lifecycle,
 						EventNumber:       eventid,
-						RealizationSeed:   stochastic.InitialRealizationSeed,
-						EventSeed:         stochastic.InitialEventSeed,
+						RealizationSeed:   realizationSeed,
+						EventSeed:         eventSeed,
 						TimeWindow:        event,
 					}
 					coptions = compute.ComputeOptions{

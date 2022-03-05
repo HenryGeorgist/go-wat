@@ -1,16 +1,20 @@
 package plugin
 
-type Plugin interface{
+import (
+	"github.com/HenryGeorgist/go-wat/compute"
+)
+
+type Plugin interface {
 	Compute(options compute.ComputeOptions) error
 	InputLinks() []string
 	OutputLinks() []string
 }
 
-type OutputReporter interface{
+type OutputReporter interface {
 	OutputVariables() []string
-	ComputeOutputVariables(selectedVariables []string)[]interface //TODO fix this
+	ComputeOutputVariables(selectedVariables []string) []string //TODO fix this
 }
 
-type EventGenerator interface{
+type EventGenerator interface {
 	GenerateTimeWindows() []compute.TimeWindow
 }

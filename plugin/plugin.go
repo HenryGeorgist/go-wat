@@ -1,8 +1,6 @@
 package plugin
 
-import (
-	"github.com/HenryGeorgist/go-wat/compute"
-)
+import "github.com/HenryGeorgist/go-wat/compute"
 
 type Plugin interface {
 	Compute(options compute.ComputeOptions) error

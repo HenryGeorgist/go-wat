@@ -4,7 +4,7 @@ import "github.com/HenryGeorgist/go-wat/compute"
 
 //Computable defines the interface to perform a compute and facilitate links
 type Computable interface {
-	Compute(model Model, options compute.ComputeOptions) error
+	Compute(model Model, options compute.Options) error
 	InputLinks() []InputDataLocation
 	OutputLinks() []OutputDataLocation
 }

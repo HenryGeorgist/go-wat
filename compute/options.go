@@ -44,8 +44,8 @@ func (d DeterministicEventOptions) TimeWindow() TimeWindow {
 	return d.timeWindow
 }
 
-//ComputeOptions composes EventOptions with information about the location of inputdata and where output data should be stored
-type ComputeOptions struct {
+//Options composes EventOptions with information about the location of inputdata and where output data should be stored
+type Options struct {
 	EventOptions
 	InputSource       string
 	OutputDestination string

@@ -67,7 +67,7 @@ func (s StochasticConfiguration) OutputDestination() string {
 
 func Compute(config Configuration) error {
 	stochastic, ok := config.(StochasticConfiguration)
-	var coptions compute.ComputeOptions
+	var coptions compute.Options
 	if ok {
 		//loop for realizations
 		eventRandom := rand.NewSource(stochastic.InitialEventSeed)
@@ -93,7 +93,7 @@ func Compute(config Configuration) error {
 						EventSeed:         eventSeed,
 					}
 					seo.UpdateTimeWindow(event)
-					coptions = compute.ComputeOptions{
+					coptions = compute.Options{
 						InputSource:       config.InputSource(),
 						OutputDestination: config.OutputDestination(),
 						EventOptions:      seo,
@@ -110,7 +110,7 @@ func Compute(config Configuration) error {
 		deterministic, _ := config.(DeterministicConfiguration)
 		deo := compute.DeterministicEventOptions{}
 		deo.UpdateTimeWindow(deterministic.TimeWindow)
-		coptions = compute.ComputeOptions{
+		coptions = compute.Options{
 			InputSource:       config.InputSource(),
 			OutputDestination: config.OutputDestination(),
 			EventOptions:      deo,
@@ -121,7 +121,7 @@ func Compute(config Configuration) error {
 }
 
 //computeEvent iterates over the program order and requests each plugin to compute the associated model in the model list.
-func computeEvent(config Configuration, options compute.ComputeOptions) error {
+func computeEvent(config Configuration, options compute.Options) error {
 	for idx, p := range config.ProgramOrder().Plugins {
 		err := p.Compute(config.Models()[idx], options)
 		if err != nil {

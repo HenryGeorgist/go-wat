@@ -1,17 +1,21 @@
 package compute
 
+import "time"
+
+//EventOptions defines the interface for event options, and requires a TimeWindow for the event
 type EventOptions interface {
-	StartTime() string
-	EndTime() string
+	TimeWindow() TimeWindow
+	//UpdateTimeWindow(t TimeWindow) EventOptions
 }
 
 type TimeWindow struct {
-	StartTime string
-	EndTime   string
+	StartTime time.Time
+	EndTime   time.Time
 }
 
+//StochasticEventOptions implements EventOptions and adds information about realizations, lifecycles, and events as well as random seeds
 type StochasticEventOptions struct {
-	TimeWindow        TimeWindow
+	timeWindow        TimeWindow
 	RealizationNumber int
 	LifecycleNumber   int
 	EventNumber       int
@@ -19,24 +23,28 @@ type StochasticEventOptions struct {
 	RealizationSeed   int64
 }
 
-func (s StochasticEventOptions) StartTime() string {
-	return s.TimeWindow.StartTime
+func (s *StochasticEventOptions) UpdateTimeWindow(t TimeWindow) EventOptions {
+	s.timeWindow = t
+	return s
 }
-func (s StochasticEventOptions) EndTime() string {
-	return s.TimeWindow.EndTime
+func (s StochasticEventOptions) TimeWindow() TimeWindow {
+	return s.timeWindow
 }
 
+//DeterministicEventOptions implements the EventOptions interface for a deterministic compute
 type DeterministicEventOptions struct {
-	TimeWindow TimeWindow
+	timeWindow TimeWindow
 }
 
-func (d DeterministicEventOptions) StartTime() string {
-	return d.TimeWindow.StartTime
+func (d *DeterministicEventOptions) UpdateTimeWindow(t TimeWindow) EventOptions {
+	d.timeWindow = t
+	return d
 }
-func (d DeterministicEventOptions) EndTime() string {
-	return d.TimeWindow.EndTime
+func (d DeterministicEventOptions) TimeWindow() TimeWindow {
+	return d.timeWindow
 }
 
+//ComputeOptions composes EventOptions with information about the location of inputdata and where output data should be stored
 type ComputeOptions struct {
 	EventOptions
 	InputSource       string

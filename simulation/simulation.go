@@ -8,12 +8,15 @@ import (
 	"github.com/HenryGeorgist/go-wat/compute"
 )
 
+//Configuration defines the interface for a simulation compute configuration
 type Configuration interface {
 	ProgramOrder() component.ProgramOrder
 	Models() []component.Model
 	InputSource() string
 	OutputDestination() string
 }
+
+//DeterministicConfiguration implement the Configuration interface for a DeterministicCompute
 type DeterministicConfiguration struct {
 	programOrder      component.ProgramOrder
 	models            []component.Model
@@ -35,6 +38,7 @@ func (d DeterministicConfiguration) OutputDestination() string {
 	return d.outputDestination
 }
 
+//StochasticConfiguration implements the Configuration interface for a Stochastic Simulation
 type StochasticConfiguration struct {
 	programOrder             component.ProgramOrder
 	models                   []component.Model
@@ -68,12 +72,16 @@ func Compute(config Configuration) error {
 		//loop for realizations
 		eventRandom := rand.NewSource(stochastic.InitialEventSeed)
 		realizationRandom := rand.NewSource(stochastic.InitialRealizationSeed)
+		//each realization can be run conccurrently
 		for realization := 0; realization < stochastic.TotalRealizations; realization++ {
 			//loop for lifecycles
 			realizationSeed := realizationRandom.Int63() //probably make one per model
+			//each lifecycle can be a job run concurrently
 			for lifecycle := 0; lifecycle < stochastic.LifecyclesPerRealization; lifecycle++ {
-				//loop for events
+				//events in a lifecycle are dependent on earlier events,
+				//events should not be run concurrently
 				//event generator create events
+				//loop for events
 				events := stochastic.EventGenerator.GenerateTimeWindows(stochastic.LifecycleTimeWindow)
 				for eventid, event := range events {
 					eventSeed := eventRandom.Int63() //probably make one per model
@@ -83,8 +91,8 @@ func Compute(config Configuration) error {
 						EventNumber:       eventid,
 						RealizationSeed:   realizationSeed,
 						EventSeed:         eventSeed,
-						TimeWindow:        event,
 					}
+					seo.UpdateTimeWindow(event)
 					coptions = compute.ComputeOptions{
 						InputSource:       config.InputSource(),
 						OutputDestination: config.OutputDestination(),
@@ -100,9 +108,8 @@ func Compute(config Configuration) error {
 	} else {
 		//assume deterministic
 		deterministic, _ := config.(DeterministicConfiguration)
-		deo := compute.DeterministicEventOptions{
-			TimeWindow: deterministic.TimeWindow,
-		}
+		deo := compute.DeterministicEventOptions{}
+		deo.UpdateTimeWindow(deterministic.TimeWindow)
 		coptions = compute.ComputeOptions{
 			InputSource:       config.InputSource(),
 			OutputDestination: config.OutputDestination(),
@@ -112,6 +119,8 @@ func Compute(config Configuration) error {
 	}
 	return errors.New("something bad happened")
 }
+
+//computeEvent iterates over the program order and requests each plugin to compute the associated model in the model list.
 func computeEvent(config Configuration, options compute.ComputeOptions) error {
 	for idx, p := range config.ProgramOrder().Plugins {
 		err := p.Compute(config.Models()[idx], options)

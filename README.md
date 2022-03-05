@@ -1,2 +1,2 @@
-## go-statistics
-A simple statistics library to support Monte Carlo analysis in go-consequences
+## go-wat
+A simple prototype program to support nested Monte Carlo analysis for water resources

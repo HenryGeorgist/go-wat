@@ -7,5 +7,18 @@ type Model struct {
 }
 
 type ModelLinks struct {
-	Links map[string]string
+	Links map[InputDataLocation]OutputDataLocation
+}
+
+type InputDataLocation struct {
+	Parameter   string
+	Format      string
+	LinkInfo    string
+	SourceModel *Model
+}
+type OutputDataLocation struct {
+	Parameter       string
+	Format          string
+	LinkInfo        string
+	GeneratingModel *Model
 }

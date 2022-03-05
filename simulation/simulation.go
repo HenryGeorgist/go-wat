@@ -118,6 +118,7 @@ func computeEvent(config Configuration, options compute.ComputeOptions) error {
 		if err != nil {
 			return err
 		}
+		//if the plugin implements the outputrecorder interface, get outputs
 	}
 	return nil
 }

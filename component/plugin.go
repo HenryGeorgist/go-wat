@@ -4,8 +4,8 @@ import "github.com/HenryGeorgist/go-wat/compute"
 
 type Computable interface {
 	Compute(model Model, options compute.ComputeOptions) error
-	InputLinks() []string
-	OutputLinks() []string
+	InputLinks() []InputDataLocation
+	OutputLinks() []OutputDataLocation
 }
 
 type OutputReporter interface {

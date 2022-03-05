@@ -1,10 +1,10 @@
 package component
 
-//Model provides structure to a specific model that a plugin can compute
-type Model struct {
-	ModelName     string      //e.g. plan name, project name, watershed name, basin name
-	Plugin        *Computable // a reference to the associated plugin
-	ModelLinkages ModelLinks  //the connections of inputs to outputs
+//Model provides interface to a specific model that a plugin can compute
+type Model interface {
+	ModelName() string         //e.g. plan name, project name, watershed name, basin name
+	Plugin() *Computable       // a reference to the associated plugin
+	ModelLinkages() ModelLinks //the connections of inputs to outputs
 }
 
 //ModelLinks provide a way to describe how models are linked for inputs and outputs.

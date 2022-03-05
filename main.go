@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	fmt.Println("welcome to statistics")
+	fmt.Println("welcome to go-wat")
 }

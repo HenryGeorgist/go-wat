@@ -10,7 +10,6 @@ import (
 )
 
 type ScalarPlugin struct {
-	Model component.Model
 }
 type ScalarModel struct {
 	name         string
@@ -28,17 +27,17 @@ func (sm ScalarModel) Plugin() *component.Computable {
 func (sm ScalarModel) ModelLinkages() component.ModelLinks {
 	return sm.links
 }
-func (s ScalarPlugin) InputLinks() []component.InputDataLocation {
+func (s ScalarPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	return ret
 }
-func (s ScalarPlugin) OutputLinks() []component.OutputDataLocation {
+func (s ScalarPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
 		Parameter:       "float64",
 		Format:          "scalar",
-		LinkInfo:        "on disk?",
-		GeneratingModel: &s.Model,
+		LinkInfo:        fmt.Sprintf("/%v.csv", model.ModelName()),
+		GeneratingModel: &model,
 	}
 	ret = append(ret, output)
 	return ret

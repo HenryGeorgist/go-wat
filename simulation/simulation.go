@@ -74,7 +74,7 @@ func Compute(config Configuration) error {
 			for lifecycle := 0; lifecycle < stochastic.LifecyclesPerRealization; lifecycle++ {
 				//loop for events
 				//event generator create events
-				events := stochastic.EventGenerator.GenerateTimeWindows()
+				events := stochastic.EventGenerator.GenerateTimeWindows(stochastic.LifecycleTimeWindow)
 				for eventid, event := range events {
 					eventSeed := eventRandom.Int63() //probably make one per model
 					seo := compute.StochasticEventOptions{

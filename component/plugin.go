@@ -14,5 +14,5 @@ type OutputReporter interface {
 }
 
 type EventGenerator interface {
-	GenerateTimeWindows() []compute.TimeWindow
+	GenerateTimeWindows(timewindow compute.TimeWindow) []compute.TimeWindow
 }

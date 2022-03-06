@@ -13,20 +13,20 @@ import (
 type ScalarPlugin struct {
 }
 type ScalarModel struct {
-	name         string
-	plugin       *component.Computable
-	links        component.ModelLinks
+	Name         string
+	ParentPlugin component.Computable
+	Links        component.ModelLinks
 	DefaultValue float64
 }
 
 func (sm ScalarModel) ModelName() string {
-	return sm.name
+	return sm.Name
 }
-func (sm ScalarModel) Plugin() *component.Computable {
-	return sm.plugin
+func (sm ScalarModel) Plugin() component.Computable {
+	return sm.ParentPlugin
 }
 func (sm ScalarModel) ModelLinkages() component.ModelLinks {
-	return sm.links
+	return sm.Links
 }
 func (s ScalarPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)

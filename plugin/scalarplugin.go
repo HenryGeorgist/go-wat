@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"os"
 
 	"github.com/HenryGeorgist/go-wat/component"
 	"github.com/HenryGeorgist/go-wat/compute"
@@ -53,6 +54,16 @@ func (s ScalarPlugin) Compute(model component.Model, options compute.Options) er
 			value = r.NormFloat64()
 		}
 		//write it to the output destination in some agreed upon format?
+		outputs := s.OutputLinks(model)
+		for _, o := range outputs {
+			outputdest := options.OutputDestination + o.LinkInfo
+			w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer w.Close()
+			fmt.Fprint(w, value)
+		}
 		fmt.Println(value)
 		return nil
 	}

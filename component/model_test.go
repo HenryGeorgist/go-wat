@@ -25,9 +25,9 @@ func TestMarshalModelLinks(t *testing.T) {
 	smaoutput := spa.OutputLinks(sma)
 	smboutput := spa.OutputLinks(smb)
 
-	modelLinks := make(map[component.InputDataLocation]component.OutputDataLocation)
-	modelLinks[aminputs[0]] = smaoutput[0]
-	modelLinks[aminputs[1]] = smboutput[0]
+	modelLinks := make([]component.Link, 2)
+	modelLinks[0] = component.Link{InputDataLocation: aminputs[0], OutputDataLocation: smaoutput[0]}
+	modelLinks[1] = component.Link{InputDataLocation: aminputs[1], OutputDataLocation: smboutput[0]}
 	ml := component.ModelLinks{Links: modelLinks}
 	am.Links = ml
 	for i, o := range ml.Links {

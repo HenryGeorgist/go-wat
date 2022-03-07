@@ -14,9 +14,9 @@ import (
 type AddPlugin struct {
 }
 type AddModel struct {
-	Name         string
-	ParentPlugin component.Computable
-	Links        component.ModelLinks
+	Name         string               `json:"name"`
+	ParentPlugin component.Computable `json:"parent_plugin"`
+	Links        component.ModelLinks `json:"-"`
 }
 
 func (am AddModel) ModelName() string {
@@ -31,10 +31,12 @@ func (am AddModel) ModelLinkages() component.ModelLinks {
 func (a AddPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	valueA := component.InputDataLocation{
+		Name:      "valueA",
 		Parameter: "float64",
 		Format:    "scalar",
 	}
 	valueB := component.InputDataLocation{
+		Name:      "valueB",
 		Parameter: "float64",
 		Format:    "scalar",
 	}

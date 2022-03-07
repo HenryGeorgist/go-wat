@@ -13,9 +13,9 @@ import (
 type ScalarPlugin struct {
 }
 type ScalarModel struct {
-	Name         string
-	ParentPlugin component.Computable
-	Links        component.ModelLinks
+	Name         string               `json:"name"`
+	ParentPlugin component.Computable `json:"parent_plugin"`
+	Links        component.ModelLinks `json:"-"`
 	DefaultValue float64
 }
 

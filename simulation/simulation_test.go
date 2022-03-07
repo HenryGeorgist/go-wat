@@ -45,11 +45,11 @@ func TestDeterministicSimulation(t *testing.T) {
 	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
 	//set up a configuration
 	deterministicconfig := DeterministicConfiguration{
-		programOrder:      programOrder,
-		models:            models,
+		Programorder:      programOrder,
+		ModelList:         models,
 		TimeWindow:        tw,
-		outputDestination: "/workspaces/go-wat/testdata/",
-		inputSource:       "/workspaces/go-wat/testdata/",
+		Outputdestination: "/workspaces/go-wat/testdata/",
+		Inputsource:       "/workspaces/go-wat/testdata/",
 	}
 	//compute
 	Compute(deterministicconfig)
@@ -92,16 +92,16 @@ func TestStochasticSimulation(t *testing.T) {
 	eg := plugin.AnnualEventGenerator{}
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
-		programOrder:             programOrder,
-		models:                   models,
+		Programorder:             programOrder,
+		ModelList:                models,
 		EventGenerator:           eg,
 		LifecycleTimeWindow:      tw,
 		TotalRealizations:        1,
 		LifecyclesPerRealization: 1,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
-		outputDestination:        "/workspaces/go-wat/testdata/",
-		inputSource:              "/workspaces/go-wat/testdata/",
+		Outputdestination:        "/workspaces/go-wat/testdata/",
+		Inputsource:              "/workspaces/go-wat/testdata/",
 	}
 	//compute
 	Compute(stochasticconfig)

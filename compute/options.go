@@ -9,44 +9,36 @@ type EventOptions interface {
 }
 
 type TimeWindow struct {
-	StartTime time.Time
-	EndTime   time.Time
+	StartTime time.Time `json:"starttime"`
+	EndTime   time.Time `json:"endtime"`
 }
 
 //StochasticEventOptions implements EventOptions and adds information about realizations, lifecycles, and events as well as random seeds
 type StochasticEventOptions struct {
-	timeWindow        TimeWindow
-	RealizationNumber int
-	LifecycleNumber   int
-	EventNumber       int
-	EventSeed         int64
-	RealizationSeed   int64
+	EventTimeWindow   TimeWindow `json:"timewindow"`
+	RealizationNumber int        `json:"realizationnumber"`
+	LifecycleNumber   int        `json:"lifecyclenumber"`
+	EventNumber       int        `json:"eventnumber"`
+	EventSeed         int64      `json:"eventseed"`
+	RealizationSeed   int64      `json:"realizationseed"`
 }
 
-func (s *StochasticEventOptions) UpdateTimeWindow(t TimeWindow) EventOptions {
-	s.timeWindow = t
-	return s
-}
 func (s StochasticEventOptions) TimeWindow() TimeWindow {
-	return s.timeWindow
+	return s.EventTimeWindow
 }
 
 //DeterministicEventOptions implements the EventOptions interface for a deterministic compute
 type DeterministicEventOptions struct {
-	timeWindow TimeWindow
+	EventTimeWindow TimeWindow `json:"timewindow"`
 }
 
-func (d *DeterministicEventOptions) UpdateTimeWindow(t TimeWindow) EventOptions {
-	d.timeWindow = t
-	return d
-}
 func (d DeterministicEventOptions) TimeWindow() TimeWindow {
-	return d.timeWindow
+	return d.EventTimeWindow
 }
 
 //Options composes EventOptions with information about the location of inputdata and where output data should be stored
 type Options struct {
-	EventOptions
-	InputSource       string
-	OutputDestination string
+	EventOptions      `json:"eventoptions"`
+	InputSource       string `json:"inputsource"`
+	OutputDestination string `json:"outputdestination"`
 }

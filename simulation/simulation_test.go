@@ -17,7 +17,7 @@ func TestDeterministicSimulation(t *testing.T) {
 	spb := plugin.ScalarPlugin{}
 	//create two scalar models
 	sma := plugin.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
-	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
+	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 1.0, ParentPluginName: spb.Name()}
 	//create an add plugin
 	ap := plugin.AddPlugin{}
 	//create an add model

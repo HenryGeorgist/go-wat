@@ -52,14 +52,3 @@ type LocalCSVLink struct {
 func (lcsv LocalCSVLink) Type() LinkType {
 	return LocalStore
 }
-
-type LocalDSSTimeSeriesLink struct {
-	DSSAPart    string `json:"DSSAPart"`
-	DSSBPart    string `json:"DSSBPart"`
-	DSSCPart    string `json:"DSSCPart"`
-	DSSFilePath string `json:"DSSFilePath"`
-}
-
-func (ldssTS LocalDSSTimeSeriesLink) Type() LinkType {
-	return LocalStore
-}

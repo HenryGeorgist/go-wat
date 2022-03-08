@@ -18,51 +18,51 @@ type Configuration interface {
 
 //DeterministicConfiguration implement the Configuration interface for a DeterministicCompute
 type DeterministicConfiguration struct {
-	programOrder      component.ProgramOrder
-	models            []component.Model
-	TimeWindow        compute.TimeWindow
-	outputDestination string
-	inputSource       string
+	Programorder      component.ProgramOrder `json:"programorder"`
+	ModelList         []component.Model      `json:"models"`
+	TimeWindow        compute.TimeWindow     `json:"timewindow"`
+	Outputdestination string                 `json:"outputdestination"`
+	Inputsource       string                 `json:"inputsource"`
 }
 
 func (d DeterministicConfiguration) ProgramOrder() component.ProgramOrder {
-	return d.programOrder
+	return d.Programorder
 }
 func (d DeterministicConfiguration) Models() []component.Model {
-	return d.models
+	return d.ModelList
 }
 func (d DeterministicConfiguration) InputSource() string {
-	return d.inputSource
+	return d.Inputsource
 }
 func (d DeterministicConfiguration) OutputDestination() string {
-	return d.outputDestination
+	return d.Outputdestination
 }
 
 //StochasticConfiguration implements the Configuration interface for a Stochastic Simulation
 type StochasticConfiguration struct {
-	programOrder             component.ProgramOrder
-	models                   []component.Model
-	EventGenerator           component.EventGenerator
-	LifecycleTimeWindow      compute.TimeWindow
-	TotalRealizations        int
-	LifecyclesPerRealization int
-	InitialRealizationSeed   int64
-	InitialEventSeed         int64
-	outputDestination        string
-	inputSource              string
+	Programorder             component.ProgramOrder   `json:"programorder"`
+	ModelList                []component.Model        `json:"models"`
+	EventGenerator           component.EventGenerator `json:"eventgenerator"`
+	LifecycleTimeWindow      compute.TimeWindow       `json:"timewindow"`
+	TotalRealizations        int                      `json:"totalrealizations"`
+	LifecyclesPerRealization int                      `json:"lifecyclesperrealization"`
+	InitialRealizationSeed   int64                    `json:"initialrealizationseed"`
+	InitialEventSeed         int64                    `json:"intitaleventseed"`
+	Outputdestination        string                   `json:"outputdestination"`
+	Inputsource              string                   `json:"inputsource"`
 }
 
 func (s StochasticConfiguration) ProgramOrder() component.ProgramOrder {
-	return s.programOrder
+	return s.Programorder
 }
 func (s StochasticConfiguration) Models() []component.Model {
-	return s.models
+	return s.ModelList
 }
 func (s StochasticConfiguration) InputSource() string {
-	return s.inputSource
+	return s.Inputsource
 }
 func (s StochasticConfiguration) OutputDestination() string {
-	return s.outputDestination
+	return s.Outputdestination
 }
 
 func Compute(config Configuration) error {
@@ -91,8 +91,8 @@ func Compute(config Configuration) error {
 						EventNumber:       eventid,
 						RealizationSeed:   realizationSeed,
 						EventSeed:         eventSeed,
+						EventTimeWindow:   event,
 					}
-					seo.UpdateTimeWindow(event)
 					coptions = compute.Options{
 						InputSource:       config.InputSource(),
 						OutputDestination: config.OutputDestination(),
@@ -108,8 +108,7 @@ func Compute(config Configuration) error {
 	} else {
 		//assume deterministic
 		deterministic, _ := config.(DeterministicConfiguration)
-		deo := compute.DeterministicEventOptions{}
-		deo.UpdateTimeWindow(deterministic.TimeWindow)
+		deo := compute.DeterministicEventOptions{EventTimeWindow: deterministic.TimeWindow}
 		coptions = compute.Options{
 			InputSource:       config.InputSource(),
 			OutputDestination: config.OutputDestination(),

@@ -31,9 +31,9 @@ func TestDeterministicSimulation(t *testing.T) {
 	smaoutput := spa.OutputLinks(sma)
 	smboutput := spa.OutputLinks(smb)
 
-	modelLinks := make(map[component.InputDataLocation]component.OutputDataLocation)
-	modelLinks[aminputs[0]] = smaoutput[0]
-	modelLinks[aminputs[1]] = smboutput[0]
+	modelLinks := make([]component.Link, 2)
+	modelLinks[0] = component.Link{InputDataLocation: aminputs[0], OutputDataLocation: smaoutput[0]}
+	modelLinks[1] = component.Link{InputDataLocation: aminputs[1], OutputDataLocation: smboutput[0]}
 	ml := component.ModelLinks{Links: modelLinks}
 	am.Links = ml
 	//set up a model list
@@ -45,11 +45,11 @@ func TestDeterministicSimulation(t *testing.T) {
 	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
 	//set up a configuration
 	deterministicconfig := DeterministicConfiguration{
-		programOrder:      programOrder,
-		models:            models,
+		Programorder:      programOrder,
+		ModelList:         models,
 		TimeWindow:        tw,
-		outputDestination: "/workspaces/go-wat/testdata/",
-		inputSource:       "/workspaces/go-wat/testdata/",
+		Outputdestination: "/workspaces/go-wat/testdata/",
+		Inputsource:       "/workspaces/go-wat/testdata/",
 	}
 	//compute
 	Compute(deterministicconfig)
@@ -76,9 +76,9 @@ func TestStochasticSimulation(t *testing.T) {
 	smaoutput := spa.OutputLinks(sma)
 	smboutput := spa.OutputLinks(smb)
 
-	modelLinks := make(map[component.InputDataLocation]component.OutputDataLocation)
-	modelLinks[aminputs[0]] = smaoutput[0]
-	modelLinks[aminputs[1]] = smboutput[0]
+	modelLinks := make([]component.Link, 2)
+	modelLinks[0] = component.Link{InputDataLocation: aminputs[0], OutputDataLocation: smaoutput[0]}
+	modelLinks[1] = component.Link{InputDataLocation: aminputs[1], OutputDataLocation: smboutput[0]}
 	ml := component.ModelLinks{Links: modelLinks}
 	am.Links = ml
 	//set up a model list
@@ -92,16 +92,16 @@ func TestStochasticSimulation(t *testing.T) {
 	eg := plugin.AnnualEventGenerator{}
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
-		programOrder:             programOrder,
-		models:                   models,
+		Programorder:             programOrder,
+		ModelList:                models,
 		EventGenerator:           eg,
 		LifecycleTimeWindow:      tw,
 		TotalRealizations:        1,
 		LifecyclesPerRealization: 1,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
-		outputDestination:        "/workspaces/go-wat/testdata/",
-		inputSource:              "/workspaces/go-wat/testdata/",
+		Outputdestination:        "/workspaces/go-wat/testdata/",
+		Inputsource:              "/workspaces/go-wat/testdata/",
 	}
 	//compute
 	Compute(stochasticconfig)

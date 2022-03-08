@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -14,9 +13,9 @@ import (
 type AddPlugin struct {
 }
 type AddModel struct {
-	Name         string
-	ParentPlugin component.Computable
-	Links        component.ModelLinks
+	Name         string               `json:"name"`
+	ParentPlugin component.Computable `json:"parent_plugin"`
+	Links        component.ModelLinks `json:"-"`
 }
 
 func (am AddModel) ModelName() string {
@@ -31,10 +30,12 @@ func (am AddModel) ModelLinkages() component.ModelLinks {
 func (a AddPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	valueA := component.InputDataLocation{
+		Name:      "valueA",
 		Parameter: "float64",
 		Format:    "scalar",
 	}
 	valueB := component.InputDataLocation{
+		Name:      "valueB",
 		Parameter: "float64",
 		Format:    "scalar",
 	}
@@ -58,16 +59,12 @@ func (a AddPlugin) Compute(model component.Model, options compute.Options) error
 	valueA := 0.0
 	valueB := 0.0
 
-	inputs := a.InputLinks(model)
+	//inputs := a.InputLinks(model)
 	links := model.ModelLinkages()
 	link1 := true
-	for _, i := range inputs {
-		input, ok := links.Links[i]
-		if !ok {
-			fmt.Println("could not find input link")
-			return errors.New("couldnt find link")
-		}
-		inputdest := options.InputSource + input.LinkInfo
+	for _, i := range links.Links {
+
+		inputdest := options.InputSource + i.OutputDataLocation.LinkInfo
 		f, err := os.Open(inputdest)
 		if err != nil {
 			fmt.Println("could not find input link")

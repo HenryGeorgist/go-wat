@@ -39,8 +39,9 @@ type InputDataLocation struct {
 
 //OutputDataLocations define where a model can produce output the format, parameter and the link information
 type OutputDataLocation struct {
-	Parameter       string `json:"parameter"`
-	Format          string `json:"format"`
-	LinkInfo        string `json:"link_info"`
-	GeneratingModel *Model `json:"-"` //`json:"generating_model"`
+	Parameter            string `json:"parameter"`
+	Format               string `json:"format"`
+	LinkInfo             string `json:"link_info"`
+	GeneratingPluginName string `json:"generating_plugin_name"`
+	GeneratingModelName  string `json:"generating_model_name"`
 }

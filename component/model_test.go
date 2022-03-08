@@ -30,18 +30,6 @@ func TestMarshalModelLinks(t *testing.T) {
 	modelLinks[1] = component.Link{InputDataLocation: aminputs[1], OutputDataLocation: smboutput[0]}
 	ml := component.ModelLinks{Links: modelLinks}
 	am.Links = ml
-	for i, o := range ml.Links {
-		bytesi, err := json.Marshal(i)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(bytesi))
-		byteso, err := json.Marshal(o)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println(string(byteso))
-	}
 	bytes, err := json.Marshal(ml)
 	if err != nil {
 		fmt.Println(err)

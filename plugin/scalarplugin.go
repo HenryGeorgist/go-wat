@@ -28,6 +28,9 @@ func (sm ScalarModel) Plugin() component.Computable {
 func (sm ScalarModel) ModelLinkages() component.ModelLinks {
 	return sm.Links
 }
+func (s ScalarPlugin) Name() string {
+	return "Scalar Plugin"
+}
 func (s ScalarPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	return ret
@@ -35,10 +38,11 @@ func (s ScalarPlugin) InputLinks(model component.Model) []component.InputDataLoc
 func (s ScalarPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
-		Parameter:       "float64",
-		Format:          "scalar",
-		LinkInfo:        fmt.Sprintf("/%v.csv", model.ModelName()),
-		GeneratingModel: &model,
+		Parameter:            "float64",
+		Format:               "scalar",
+		LinkInfo:             fmt.Sprintf("/%v.csv", model.ModelName()),
+		GeneratingModelName:  model.ModelName(),
+		GeneratingPluginName: s.Name(),
 	}
 	ret = append(ret, output)
 	return ret

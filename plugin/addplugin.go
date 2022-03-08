@@ -27,6 +27,9 @@ func (sm AddModel) Plugin() component.Computable {
 func (am AddModel) ModelLinkages() component.ModelLinks {
 	return am.Links
 }
+func (a AddPlugin) Name() string {
+	return "Add Plugin"
+}
 func (a AddPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	valueA := component.InputDataLocation{
@@ -46,10 +49,11 @@ func (a AddPlugin) InputLinks(model component.Model) []component.InputDataLocati
 func (a AddPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
-		Parameter:       "float64",
-		Format:          "scalar",
-		LinkInfo:        fmt.Sprintf("/%v.csv", model.ModelName()),
-		GeneratingModel: &model,
+		Parameter:            "float64",
+		Format:               "scalar",
+		LinkInfo:             fmt.Sprintf("/%v.csv", model.ModelName()),
+		GeneratingModelName:  model.ModelName(),
+		GeneratingPluginName: a.Name(),
 	}
 	ret = append(ret, output)
 	return ret

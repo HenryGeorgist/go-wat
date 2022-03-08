@@ -13,16 +13,20 @@ import (
 type AddPlugin struct {
 }
 type AddModel struct {
-	Name         string               `json:"name"`
-	ParentPlugin component.Computable `json:"parent_plugin"`
-	Links        component.ModelLinks `json:"-"`
+	Name             string               `json:"name"`
+	ParentPluginName string               `json:"parent_plugin_name"`
+	Links            component.ModelLinks `json:"-"`
 }
 
 func (am AddModel) ModelName() string {
 	return am.Name
 }
-func (sm AddModel) Plugin() component.Computable {
-	return sm.ParentPlugin
+func (sm AddModel) PluginName() string {
+	return sm.ParentPluginName
+}
+func (a AddPlugin) MarshalJSON() ([]byte, error) {
+	ret := "{\"plugin_name\":\"" + a.Name() + "\"}"
+	return []byte(ret), nil
 }
 func (am AddModel) ModelLinkages() component.ModelLinks {
 	return am.Links

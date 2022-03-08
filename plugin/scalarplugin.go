@@ -13,23 +13,27 @@ import (
 type ScalarPlugin struct {
 }
 type ScalarModel struct {
-	Name         string               `json:"name"`
-	ParentPlugin component.Computable `json:"parent_plugin"`
-	Links        component.ModelLinks `json:"-"`
-	DefaultValue float64
+	Name             string               `json:"name"`
+	ParentPluginName string               `json:"parent_plugin_name"`
+	Links            component.ModelLinks `json:"-"`
+	DefaultValue     float64
 }
 
 func (sm ScalarModel) ModelName() string {
 	return sm.Name
 }
-func (sm ScalarModel) Plugin() component.Computable {
-	return sm.ParentPlugin
+func (sm ScalarModel) PluginName() string {
+	return sm.ParentPluginName
 }
 func (sm ScalarModel) ModelLinkages() component.ModelLinks {
 	return sm.Links
 }
 func (s ScalarPlugin) Name() string {
 	return "Scalar Plugin"
+}
+func (s ScalarPlugin) MarshalJSON() ([]byte, error) {
+	ret := "{\"plugin_name\":\"" + s.Name() + "\"}"
+	return []byte(ret), nil
 }
 func (s ScalarPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)

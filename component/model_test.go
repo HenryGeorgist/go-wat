@@ -14,12 +14,12 @@ func TestMarshalModelLinks(t *testing.T) {
 	spa := plugin.ScalarPlugin{}
 	spb := plugin.ScalarPlugin{}
 	//create two scalar models
-	sma := plugin.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPlugin: spa}
-	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPlugin: spb}
+	sma := plugin.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
+	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
 	//create an add plugin
 	ap := plugin.AddPlugin{}
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPlugin: ap}
+	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 	//model link
 	aminputs := ap.InputLinks(am)
 	smaoutput := spa.OutputLinks(sma)
@@ -40,7 +40,7 @@ func TestMarshalInputDataLocation(t *testing.T) {
 	//create an add plugin
 	ap := plugin.AddPlugin{}
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPlugin: ap}
+	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 	//model link
 	aminputs := ap.InputLinks(am)
 
@@ -54,7 +54,7 @@ func TestMarshalOutputDataLocation(t *testing.T) {
 	//create an add plugin
 	ap := plugin.AddPlugin{}
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPlugin: ap}
+	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 	//model link
 	amoutputs := ap.OutputLinks(am)
 

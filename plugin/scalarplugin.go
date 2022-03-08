@@ -44,7 +44,7 @@ func (s ScalarPlugin) OutputLinks(model component.Model) []component.OutputDataL
 	output := component.OutputDataLocation{
 		Parameter:            "float64",
 		Format:               "scalar",
-		LinkInfo:             fmt.Sprintf("/%v.csv", model.ModelName()),
+		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.csv", model.ModelName())},
 		GeneratingModelName:  model.ModelName(),
 		GeneratingPluginName: s.Name(),
 	}
@@ -64,7 +64,8 @@ func (s ScalarPlugin) Compute(model component.Model, options compute.Options) er
 		//write it to the output destination in some agreed upon format?
 		outputs := s.OutputLinks(model)
 		for _, o := range outputs {
-			outputdest := options.OutputDestination + o.LinkInfo
+			lcsv, _ := o.LinkInfo.(component.LocalCSVLink)
+			outputdest := options.OutputDestination + lcsv.Path
 			w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 			if err != nil {
 				fmt.Println(err)

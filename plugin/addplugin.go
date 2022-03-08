@@ -55,7 +55,7 @@ func (a AddPlugin) OutputLinks(model component.Model) []component.OutputDataLoca
 	output := component.OutputDataLocation{
 		Parameter:            "float64",
 		Format:               "scalar",
-		LinkInfo:             fmt.Sprintf("/%v.csv", model.ModelName()),
+		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.csv", model.ModelName())},
 		GeneratingModelName:  model.ModelName(),
 		GeneratingPluginName: a.Name(),
 	}
@@ -71,36 +71,40 @@ func (a AddPlugin) Compute(model component.Model, options compute.Options) error
 	links := model.ModelLinkages()
 	link1 := true
 	for _, i := range links.Links {
+		lcsv, linkok := i.OutputDataLocation.LinkInfo.(component.LocalCSVLink)
+		if linkok {
+			inputdest := options.InputSource + lcsv.Path
+			f, err := os.Open(inputdest)
+			if err != nil {
+				fmt.Println("could not find input link")
+				return err
+			}
+			defer f.Close()
+			scanner := bufio.NewScanner(f)
+			scanner.Scan()
+			s := scanner.Text()
+			if link1 {
+				valueA, err = strconv.ParseFloat(s, 64)
+				if err != nil {
+					fmt.Println("could not parse the first file")
+				}
+				link1 = false
+			} else {
+				valueB, err = strconv.ParseFloat(s, 64)
+				if err != nil {
+					fmt.Println("could not parse the second file")
+				}
+			}
+		}
 
-		inputdest := options.InputSource + i.OutputDataLocation.LinkInfo
-		f, err := os.Open(inputdest)
-		if err != nil {
-			fmt.Println("could not find input link")
-			return err
-		}
-		defer f.Close()
-		scanner := bufio.NewScanner(f)
-		scanner.Scan()
-		s := scanner.Text()
-		if link1 {
-			valueA, err = strconv.ParseFloat(s, 64)
-			if err != nil {
-				fmt.Println("could not parse the first file")
-			}
-			link1 = false
-		} else {
-			valueB, err = strconv.ParseFloat(s, 64)
-			if err != nil {
-				fmt.Println("could not parse the second file")
-			}
-		}
 	}
 	//add them together
 	result := valueA + valueB
 	//write out the result.
 	outputs := a.OutputLinks(model)
 	for _, o := range outputs {
-		outputdest := options.OutputDestination + o.LinkInfo
+		lcsv, _ := o.LinkInfo.(component.LocalCSVLink)
+		outputdest := options.OutputDestination + lcsv.Path
 		w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			fmt.Println(err)

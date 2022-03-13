@@ -58,7 +58,7 @@ func (s ScalarPlugin) Compute(model component.Model, options compute.Options) er
 		stochastic, ok := options.EventOptions.(compute.StochasticEventOptions)
 		if ok {
 			//use a seed!
-			r := rand.New(rand.NewSource(stochastic.EventSeed))
+			r := rand.New(rand.NewSource(stochastic.EventSeeds[options.CurrentModelIndex()]))
 			value = r.NormFloat64()
 		}
 		//write it to the output destination in some agreed upon format?

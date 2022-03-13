@@ -67,7 +67,7 @@ func (hsp HydrographScalerPlugin) Compute(model component.Model, options compute
 		stochastic, ok := options.EventOptions.(compute.StochasticEventOptions)
 		if ok {
 			//use a seed!
-			r := rand.New(rand.NewSource(stochastic.EventSeed))
+			r := rand.New(rand.NewSource(stochastic.EventSeeds[options.CurrentModelIndex()]))
 			value = hsm.FlowFrequency.InvCDF(r.Float64())
 		}
 		//write it to the output destination in some agreed upon format?

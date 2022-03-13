@@ -4,14 +4,17 @@ import "golang.org/x/exp/rand"
 
 type SeedManager struct {
 	Seed        int64
-	PluginCount int64
+	PluginCount int
 	rng         *rand.Rand
 }
 
-func (sm *SeedManager) AdvanceTo(iteration int64) {
+func (sm *SeedManager) Init() {
+	sm.rng = rand.New(rand.NewSource(uint64(sm.Seed)))
+}
+func (sm *SeedManager) AdvanceTo(iteration int) {
 	skippedseeds := iteration * sm.PluginCount
 	sm.rng = rand.New(rand.NewSource(uint64(sm.Seed)))
-	for i := 0; i < int(skippedseeds); i++ {
+	for i := 0; i < skippedseeds; i++ {
 		sm.rng.Int63()
 	}
 }

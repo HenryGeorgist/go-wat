@@ -2,7 +2,6 @@ package simulation
 
 import (
 	"errors"
-	"math/rand"
 
 	"github.com/HenryGeorgist/go-wat/component"
 	"github.com/HenryGeorgist/go-wat/compute"
@@ -70,12 +69,20 @@ func Compute(config Configuration) error {
 	var coptions compute.Options
 	if ok {
 		//loop for realizations
-		eventRandom := rand.NewSource(stochastic.InitialEventSeed)
-		realizationRandom := rand.NewSource(stochastic.InitialRealizationSeed)
+		eventRandom := component.SeedManager{
+			Seed:        stochastic.InitialEventSeed,
+			PluginCount: len(config.Models()),
+		}
+		eventRandom.Init()
+		realizationRandom := component.SeedManager{
+			Seed:        stochastic.InitialRealizationSeed,
+			PluginCount: len(config.Models()),
+		}
+		realizationRandom.Init()
 		//each realization can be run conccurrently
 		for realization := 0; realization < stochastic.TotalRealizations; realization++ {
 			//loop for lifecycles
-			realizationSeed := realizationRandom.Int63() //probably make one per model
+			realizationSeeds := realizationRandom.GeneratePluginSeeds() //probably make one per model
 			//each lifecycle can be a job run concurrently
 			for lifecycle := 0; lifecycle < stochastic.LifecyclesPerRealization; lifecycle++ {
 				//events in a lifecycle are dependent on earlier events,
@@ -84,14 +91,15 @@ func Compute(config Configuration) error {
 				//loop for events
 				events := stochastic.EventGenerator.GenerateTimeWindows(stochastic.LifecycleTimeWindow)
 				for eventid, event := range events {
-					eventSeed := eventRandom.Int63() //probably make one per model
+					eventSeeds := eventRandom.GeneratePluginSeeds() //probably make one per model
 					seo := compute.StochasticEventOptions{
 						RealizationNumber: realization,
 						LifecycleNumber:   lifecycle,
 						EventNumber:       eventid,
-						RealizationSeed:   realizationSeed,
-						EventSeed:         eventSeed,
+						RealizationSeeds:  realizationSeeds,
+						EventSeeds:        eventSeeds,
 						EventTimeWindow:   event,
+						CurrentModel:      0,
 					}
 					coptions = compute.Options{
 						InputSource:       config.InputSource(),
@@ -126,6 +134,7 @@ func computeEvent(config Configuration, options compute.Options) error {
 		if err != nil {
 			return err
 		}
+		options.EventOptions = options.IncrementModelIndex()
 		//if the plugin implements the outputrecorder interface, get outputs
 	}
 	return nil

@@ -6,6 +6,9 @@ import "time"
 type EventOptions interface {
 	TimeWindow() TimeWindow
 	//UpdateTimeWindow(t TimeWindow) EventOptions
+	CurrentModelIndex() int
+	IncrementModelIndex() EventOptions
+	ResetModelIndex() EventOptions
 }
 
 type TimeWindow struct {
@@ -19,8 +22,9 @@ type StochasticEventOptions struct {
 	RealizationNumber int        `json:"realizationnumber"`
 	LifecycleNumber   int        `json:"lifecyclenumber"`
 	EventNumber       int        `json:"eventnumber"`
-	EventSeed         int64      `json:"eventseed"`
-	RealizationSeed   int64      `json:"realizationseed"`
+	EventSeeds        []int64    `json:"eventseeds"`
+	RealizationSeeds  []int64    `json:"realizationseeds"`
+	CurrentModel      int        `json:"CurrentModel"`
 }
 
 func (s StochasticEventOptions) TimeWindow() TimeWindow {
@@ -41,4 +45,25 @@ type Options struct {
 	EventOptions      `json:"eventoptions"`
 	InputSource       string `json:"inputsource"`
 	OutputDestination string `json:"outputdestination"`
+}
+
+func (d DeterministicEventOptions) CurrentModelIndex() int {
+	return 0
+}
+func (d DeterministicEventOptions) IncrementModelIndex() EventOptions {
+	return d
+}
+func (d DeterministicEventOptions) ResetModelIndex() EventOptions {
+	return d
+}
+func (s StochasticEventOptions) CurrentModelIndex() int {
+	return s.CurrentModel
+}
+func (s StochasticEventOptions) IncrementModelIndex() EventOptions {
+	s.CurrentModel += 1
+	return s
+}
+func (s StochasticEventOptions) ResetModelIndex() EventOptions {
+	s.CurrentModel = 0
+	return s
 }

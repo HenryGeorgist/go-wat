@@ -9,6 +9,7 @@ import (
 	"github.com/HenryGeorgist/go-wat/component"
 	"github.com/HenryGeorgist/go-wat/compute"
 	"github.com/HenryGeorgist/go-wat/plugin"
+	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 )
 
 func TestDeterministicSimulation(t *testing.T) {
@@ -163,4 +164,51 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 		fmt.Println(err)
 	}
 	fmt.Println(string(bytes))
+}
+func TestStochasticSimulation_withHydrograph(t *testing.T) {
+	//create a hydrograph scaler plugin
+	hsp := plugin.HydrographScalerPlugin{}
+	//create a hydrograph scaler model
+	flows := []float64{1.0, 5.0, 2.0}
+	flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02}
+	hsm := plugin.HydrographScalerModel{
+		Name:             "RAS Boundary",
+		ParentPluginName: hsp.Name(),
+		TimeStep:         time.Hour,
+		Flows:            flows,
+		FlowFrequency:    flow_frequency,
+	}
+
+	//create a program order
+	plugins := make([]component.Computable, 1)
+	plugins[0] = hsp
+	programOrder := component.ProgramOrder{Plugins: plugins}
+	//model link
+	modelLinks := make([]component.Link, 0)
+	ml := component.ModelLinks{Links: modelLinks}
+	hsm.Links = ml
+	//set up a model list
+	models := make([]component.Model, 1)
+	models[0] = hsm
+	//set up a timewindow
+	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2018, 1, 1, 4, 1, 1, 1, time.Local)}
+	//create an event generator
+	eg := plugin.AnnualEventGenerator{}
+	//set up a configuration
+	stochasticconfig := StochasticConfiguration{
+		Programorder:             programOrder,
+		ModelList:                models,
+		EventGenerator:           eg,
+		LifecycleTimeWindow:      tw,
+		TotalRealizations:        1,
+		LifecyclesPerRealization: 1,
+		InitialRealizationSeed:   1234,
+		InitialEventSeed:         1234,
+		Outputdestination:        "/workspaces/go-wat/testdata/",
+		Inputsource:              "/workspaces/go-wat/testdata/",
+	}
+	bytes, _ := json.Marshal(stochasticconfig)
+	fmt.Println(string(bytes))
+	//compute
+	Compute(stochasticconfig)
 }

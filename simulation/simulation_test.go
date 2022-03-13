@@ -170,7 +170,7 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 	hsp := plugin.HydrographScalerPlugin{}
 	//create a hydrograph scaler model
 	flows := []float64{1.0, 5.0, 2.0}
-	flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02}
+	flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10}
 	hsm := plugin.HydrographScalerModel{
 		Name:             "RAS Boundary",
 		ParentPluginName: hsp.Name(),

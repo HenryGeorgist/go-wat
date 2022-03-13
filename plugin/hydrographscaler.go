@@ -15,12 +15,12 @@ import (
 type HydrographScalerPlugin struct {
 }
 type HydrographScalerModel struct {
-	Name             string                            `json:"name"`
-	ParentPluginName string                            `json:"parent_plugin_name"`
-	Flows            []float64                         `json:"flows"`
-	TimeStep         time.Duration                     `json:"timestep"`
-	FlowFrequency    statistics.ContinuousDistribution `json:"flow_frequency"`
-	Links            component.ModelLinks              `json:"-"`
+	Name             string                                `json:"name"`
+	ParentPluginName string                                `json:"parent_plugin_name"`
+	Flows            []float64                             `json:"flows"`
+	TimeStep         time.Duration                         `json:"timestep"`
+	FlowFrequency    statistics.BootstrappableDistribution `json:"flow_frequency"`
+	Links            component.ModelLinks                  `json:"-"`
 }
 
 //model implementation
@@ -67,8 +67,11 @@ func (hsp HydrographScalerPlugin) Compute(model component.Model, options compute
 		stochastic, ok := options.EventOptions.(compute.StochasticEventOptions)
 		if ok {
 			//use a seed!
+			//bootstrap first (this is inefficient because it should only happen once per realization)
+			b := hsm.FlowFrequency.Bootstrap(stochastic.RealizationSeeds[options.CurrentModelIndex()])
+			//then sample event level peak value
 			r := rand.New(rand.NewSource(stochastic.EventSeeds[options.CurrentModelIndex()]))
-			value = hsm.FlowFrequency.InvCDF(r.Float64())
+			value = b.InvCDF(r.Float64())
 		}
 		//write it to the output destination in some agreed upon format?
 		outputs := hsp.OutputLinks(model)

@@ -90,7 +90,7 @@ func TestStochasticSimulation(t *testing.T) {
 	models[1] = smb
 	models[2] = am
 	//set up a timewindow
-	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
+	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
 	//create an event generator
 	eg := plugin.AnnualEventGenerator{}
 	//set up a configuration
@@ -191,7 +191,7 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 	models := make([]component.Model, 1)
 	models[0] = hsm
 	//set up a timewindow
-	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2018, 1, 1, 4, 1, 1, 1, time.Local)}
+	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
 	//create an event generator
 	eg := plugin.AnnualEventGenerator{}
 	//set up a configuration

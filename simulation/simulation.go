@@ -2,6 +2,8 @@ package simulation
 
 import (
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/HenryGeorgist/go-wat/component"
 	"github.com/HenryGeorgist/go-wat/compute"
@@ -69,6 +71,8 @@ func Compute(config Configuration) error {
 	var coptions compute.Options
 	if ok {
 		//loop for realizations
+		rootOutputPath := config.OutputDestination()
+		rootinputPath := config.InputSource()
 		eventRandom := component.SeedManager{
 			Seed:        stochastic.InitialEventSeed,
 			PluginCount: len(config.Models()),
@@ -81,6 +85,8 @@ func Compute(config Configuration) error {
 		realizationRandom.Init()
 		//each realization can be run conccurrently
 		for realization := 0; realization < stochastic.TotalRealizations; realization++ {
+			realizationInputPath := rootinputPath + "realization " + fmt.Sprint(realization) + "/"
+			realizationOutputPath := rootOutputPath + "realization " + fmt.Sprint(realization) + "/"
 			//loop for lifecycles
 			realizationSeeds := realizationRandom.GeneratePluginSeeds() //probably make one per model
 			//each lifecycle can be a job run concurrently
@@ -88,9 +94,15 @@ func Compute(config Configuration) error {
 				//events in a lifecycle are dependent on earlier events,
 				//events should not be run concurrently
 				//event generator create events
+				lifecycleInputPath := realizationInputPath + "lifecycle " + fmt.Sprint(lifecycle) + "/"
+				lifecycleOutputPath := realizationOutputPath + "lifecycle " + fmt.Sprint(lifecycle) + "/"
 				//loop for events
 				events := stochastic.EventGenerator.GenerateTimeWindows(stochastic.LifecycleTimeWindow)
 				for eventid, event := range events {
+					stochastic.Inputsource = lifecycleInputPath + "event " + fmt.Sprint(eventid)
+					stochastic.Outputdestination = lifecycleOutputPath + "event " + fmt.Sprint(eventid)
+					_ = os.MkdirAll(stochastic.InputSource(), os.ModeTemporary)
+					_ = os.MkdirAll(stochastic.OutputDestination(), os.ModeTemporary)
 					eventSeeds := eventRandom.GeneratePluginSeeds() //probably make one per model
 					seo := compute.StochasticEventOptions{
 						RealizationNumber: realization,
@@ -102,8 +114,8 @@ func Compute(config Configuration) error {
 						CurrentModel:      0,
 					}
 					coptions = compute.Options{
-						InputSource:       config.InputSource(),
-						OutputDestination: config.OutputDestination(),
+						InputSource:       stochastic.InputSource(),
+						OutputDestination: stochastic.OutputDestination(),
 						EventOptions:      seo,
 					}
 					computeEvent(config, coptions)

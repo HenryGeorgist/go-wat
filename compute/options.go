@@ -43,8 +43,9 @@ func (d DeterministicEventOptions) TimeWindow() TimeWindow {
 //Options composes EventOptions with information about the location of inputdata and where output data should be stored
 type Options struct {
 	EventOptions      `json:"eventoptions"`
-	InputSource       string `json:"inputsource"`
-	OutputDestination string `json:"outputdestination"`
+	InputSource       string              `json:"inputsource"`
+	OutputDestination string              `json:"outputdestination"`
+	OutputVariables   map[string][]string `json:"output_variables"`
 }
 
 func (d DeterministicEventOptions) CurrentModelIndex() int {

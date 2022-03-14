@@ -12,8 +12,8 @@ type Computable interface {
 
 //OutputReporter provides the interface to compute output varibles
 type OutputReporter interface {
-	OutputVariables() []string
-	ComputeOutputVariables(selectedVariables []string) []string //TODO fix this
+	OutputVariables(model Model) []string
+	ComputeOutputVariables(selectedVariables []string, model Model) ([]float64, error) //TODO fix this
 }
 
 //EventGenerator is an additional interface to generate timewindows for a lifecycle

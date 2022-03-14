@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -10,12 +11,14 @@ import (
 	"github.com/HenryGeorgist/go-wat/compute"
 )
 
+var output float64 = 0.0 //bad form
 type AddPlugin struct {
 }
 type AddModel struct {
 	Name             string               `json:"name"`
 	ParentPluginName string               `json:"parent_plugin_name"`
 	Links            component.ModelLinks `json:"-"`
+	output           float64              `json:"-"`
 }
 
 func (am AddModel) ModelName() string {
@@ -100,6 +103,7 @@ func (a AddPlugin) Compute(model component.Model, options compute.Options) error
 	}
 	//add them together
 	result := valueA + valueB
+	output = result
 	//write out the result.
 	outputs := a.OutputLinks(model)
 	for _, o := range outputs {
@@ -113,4 +117,20 @@ func (a AddPlugin) Compute(model component.Model, options compute.Options) error
 		fmt.Fprint(w, result)
 	}
 	return nil
+}
+
+//implement the output variable interface.
+func (a AddPlugin) OutputVariables(model component.Model) []string {
+	ret := make([]string, 1)
+	ret[0] = a.Name() + " output"
+	return ret
+}
+func (a AddPlugin) ComputeOutputVariables(selectedVariables []string, model component.Model) ([]float64, error) {
+	ret := make([]float64, 0)
+	if len(selectedVariables) > 0 {
+		if selectedVariables[0] == a.Name()+" output" {
+			return append(ret, output), nil
+		}
+	}
+	return ret, errors.New("No output variable found")
 }

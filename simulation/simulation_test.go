@@ -95,16 +95,17 @@ func TestStochasticSimulation(t *testing.T) {
 	eg := plugin.AnnualEventGenerator{}
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
-		Programorder:             programOrder,
-		ModelList:                models,
-		EventGenerator:           eg,
-		LifecycleTimeWindow:      tw,
-		TotalRealizations:        5,
-		LifecyclesPerRealization: 3,
-		InitialRealizationSeed:   1234,
-		InitialEventSeed:         1234,
-		Outputdestination:        "/workspaces/go-wat/testdata/",
-		Inputsource:              "/workspaces/go-wat/testdata/",
+		Programorder:                 programOrder,
+		ModelList:                    models,
+		EventGenerator:               eg,
+		LifecycleTimeWindow:          tw,
+		TotalRealizations:            5,
+		LifecyclesPerRealization:     3,
+		InitialRealizationSeed:       1234,
+		InitialEventSeed:             1234,
+		Outputdestination:            "/workspaces/go-wat/testdata/",
+		Inputsource:                  "/workspaces/go-wat/testdata/",
+		DeleteOutputAfterRealization: true,
 	}
 	//compute
 	Compute(stochasticconfig)

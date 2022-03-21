@@ -1,0 +1,44 @@
+{
+  "name": "go-wat",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "go-wat",
+  "runServices": ["go-wat"],
+  "shutdownAction": "stopCompose",
+  "workspaceFolder": "/workspaces",
+  "extensions": [
+    "golang.go",
+    "vscode-icons-team.vscode-icons" 
+  ],
+  "settings": {
+    "go.useLanguageServer": true,
+    "[go]": {
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+      }
+    },
+    "[go.mod]": {
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+      }
+    },
+    "gopls": {
+      "build.buildFlags": ["-tags", ""],
+      "usePlaceholders": false,
+      "staticcheck": true
+    },
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "package",
+    "editor.formatOnSave": true,
+    "go.toolsEnvVars": {
+      "CGO_ENABLED": 1
+    },
+    "go.testEnvVars": {
+      "": ""
+    },
+    "go.testFlags": ["-v", "-race"],
+    "go.testTimeout": "10s",
+    "go.coverOnSingleTest": true,
+    "go.coverOnSingleTestFile": true,
+    "go.coverOnTestPackage": true
+  }
+}

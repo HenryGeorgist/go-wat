@@ -2,7 +2,6 @@ package plugin
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,9 +10,11 @@ import (
 	"go-wat/compute"
 )
 
-var output float64 = 0.0 //bad form
+var output float64 = 0.0 // bad form
+
 type AddPlugin struct {
 }
+
 type AddModel struct {
 	Name             string               `json:"name"`
 	ParentPluginName string               `json:"parent_plugin_name"`
@@ -24,20 +25,25 @@ type AddModel struct {
 func (am AddModel) ModelName() string {
 	return am.Name
 }
-func (sm AddModel) PluginName() string {
-	return sm.ParentPluginName
+
+func (am AddModel) PluginName() string {
+	return am.ParentPluginName
 }
-func (a AddPlugin) MarshalJSON() ([]byte, error) {
-	ret := "{\"plugin_name\":\"" + a.Name() + "\"}"
+
+func (ap AddPlugin) MarshalJSON() ([]byte, error) {
+	ret := "{\"plugin_name\":\"" + ap.Name() + "\"}"
 	return []byte(ret), nil
 }
+
 func (am AddModel) ModelLinkages() component.ModelLinks {
 	return am.Links
 }
-func (a AddPlugin) Name() string {
+
+func (ap AddPlugin) Name() string {
 	return "Add Plugin"
 }
-func (a AddPlugin) InputLinks(model component.Model) []component.InputDataLocation {
+
+func (ap AddPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	valueA := component.InputDataLocation{
 		Name:      "valueA",
@@ -53,19 +59,21 @@ func (a AddPlugin) InputLinks(model component.Model) []component.InputDataLocati
 	ret = append(ret, valueB)
 	return ret
 }
-func (a AddPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
+
+func (ap AddPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
 		Parameter:            "float64",
 		Format:               "scalar",
 		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.csv", model.ModelName())},
 		GeneratingModelName:  model.ModelName(),
-		GeneratingPluginName: a.Name(),
+		GeneratingPluginName: ap.Name(),
 	}
 	ret = append(ret, output)
 	return ret
 }
-func (a AddPlugin) Compute(model component.Model, options compute.Options) error {
+
+func (ap AddPlugin) Compute(model component.Model, options compute.Options) error {
 	//model.ModelLinkages[]
 	valueA := 0.0
 	valueB := 0.0
@@ -105,7 +113,7 @@ func (a AddPlugin) Compute(model component.Model, options compute.Options) error
 	result := valueA + valueB
 	output = result
 	//write out the result.
-	outputs := a.OutputLinks(model)
+	outputs := ap.OutputLinks(model)
 	for _, o := range outputs {
 		lcsv, _ := o.LinkInfo.(component.LocalCSVLink)
 		outputdest := options.OutputDestination + lcsv.Path
@@ -120,17 +128,18 @@ func (a AddPlugin) Compute(model component.Model, options compute.Options) error
 }
 
 //implement the output variable interface.
-func (a AddPlugin) OutputVariables(model component.Model) []string {
+func (ap AddPlugin) OutputVariables(model component.Model) []string {
 	ret := make([]string, 1)
-	ret[0] = a.Name() + " output"
+	ret[0] = ap.Name() + " output"
 	return ret
 }
-func (a AddPlugin) ComputeOutputVariables(selectedVariables []string, model component.Model) ([]float64, error) {
+
+func (ap AddPlugin) ComputeOutputVariables(selectedVariables []string, model component.Model) ([]float64, error) {
 	ret := make([]float64, 0)
 	if len(selectedVariables) > 0 {
-		if selectedVariables[0] == a.Name()+" output" {
+		if selectedVariables[0] == ap.Name()+" output" {
 			return append(ret, output), nil
 		}
 	}
-	return ret, errors.New("No output variable found")
+	return ret, fmt.Errorf("no output variable found")
 }

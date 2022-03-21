@@ -135,7 +135,6 @@ func Compute(config Configuration) error {
 				lifecycleOutputPath := fmt.Sprintf("%s/lifecycle-%v", realizationOutputPath, lifecycle)
 
 				//loop for events
-
 				err := stochastic.LifecycleTimeWindow.IsValid()
 				if err != nil {
 					return err
@@ -147,6 +146,7 @@ func Compute(config Configuration) error {
 
 					stochastic.Inputsource = fmt.Sprintf("%s/event-%v", lifecycleInputPath, eventid)
 					stochastic.Outputdestination = fmt.Sprintf("%s/event-%v", lifecycleOutputPath, eventid)
+
 					err := os.MkdirAll(stochastic.InputSource(), 0600)
 					if err != nil {
 						return err
@@ -201,17 +201,31 @@ func Compute(config Configuration) error {
 		} //realizations
 		fmt.Println(outputvariableHistograms)
 		return nil
+
 	} else {
 		//assume deterministic
 		outputvariablesMap := make(map[string][]string)
 		deterministic, _ := config.(DeterministicConfiguration)
+
 		deo := compute.DeterministicEventOptions{EventTimeWindow: deterministic.TimeWindow}
+
 		coptions = compute.Options{
 			InputSource:       config.InputSource(),
 			OutputDestination: config.OutputDestination(),
 			EventOptions:      deo,
 			OutputVariables:   outputvariablesMap,
 		}
+
+		err := os.MkdirAll(config.OutputDestination(), 0600)
+		if err != nil {
+			return err
+		}
+
+		err = os.MkdirAll(config.OutputDestination(), 0600)
+		if err != nil {
+			return err
+		}
+
 		outputs, err := computeEvent(config, coptions)
 		fmt.Println(outputs)
 		return err
@@ -229,7 +243,7 @@ func computeEvent(config Configuration, options compute.Options) (map[string][]f
 		}
 		options.EventOptions = options.IncrementModelIndex()
 
-		//if the plugin implements the outputrecorder interface, get outputs
+		// if the plugin implements the outputrecorder interface, get outputs
 		outputvariables, ok := options.OutputVariables[config.Models()[idx].ModelName()]
 		if ok {
 			ovp, ovpok := p.(component.OutputReporter)

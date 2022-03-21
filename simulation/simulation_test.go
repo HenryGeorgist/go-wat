@@ -6,9 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/HenryGeorgist/go-wat/component"
-	"github.com/HenryGeorgist/go-wat/compute"
-	"github.com/HenryGeorgist/go-wat/plugin"
+	"go-wat/component"
+	"go-wat/compute"
+	"go-wat/plugin"
+
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 )
 
@@ -51,8 +52,8 @@ func TestDeterministicSimulation(t *testing.T) {
 		Programorder:      programOrder,
 		ModelList:         models,
 		TimeWindow:        tw,
-		Outputdestination: "/workspaces/go-wat/testdata/",
-		Inputsource:       "/workspaces/go-wat/testdata/",
+		Outputdestination: "app/data/",
+		Inputsource:       "app/data/",
 	}
 	//compute
 	Compute(deterministicconfig)
@@ -103,8 +104,8 @@ func TestStochasticSimulation(t *testing.T) {
 		LifecyclesPerRealization:     3,
 		InitialRealizationSeed:       1234,
 		InitialEventSeed:             1234,
-		Outputdestination:            "/workspaces/go-wat/testdata/",
-		Inputsource:                  "/workspaces/go-wat/testdata/",
+		Outputdestination:            "/workspaces/data",
+		Inputsource:                  "/workspaces/data",
 		DeleteOutputAfterRealization: true,
 	}
 	//compute
@@ -156,8 +157,8 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 		LifecyclesPerRealization: 1,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
-		Outputdestination:        "/workspaces/go-wat/testdata/",
-		Inputsource:              "/workspaces/go-wat/testdata/",
+		Outputdestination:        "/workspaces/data",
+		Inputsource:              "/workspaces/data",
 	}
 	//compute
 	bytes, err := json.Marshal(stochasticconfig)
@@ -173,7 +174,7 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 	flows := []float64{1.0, 5.0, 2.0}
 	flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10}
 	hsm := plugin.HydrographScalerModel{
-		Name:             "RAS Boundary",
+		Name:             "RASBoundary",
 		ParentPluginName: hsp.Name(),
 		TimeStep:         time.Hour,
 		Flows:            flows,
@@ -201,12 +202,12 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 		ModelList:                models,
 		EventGenerator:           eg,
 		LifecycleTimeWindow:      tw,
-		TotalRealizations:        1,
-		LifecyclesPerRealization: 1,
+		TotalRealizations:        3,
+		LifecyclesPerRealization: 2,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
-		Outputdestination:        "/workspaces/go-wat/testdata/",
-		Inputsource:              "/workspaces/go-wat/testdata/",
+		Outputdestination:        "/workspaces/data/",
+		Inputsource:              "/workspaces/data/",
 	}
 	bytes, _ := json.Marshal(stochasticconfig)
 	fmt.Println(string(bytes))

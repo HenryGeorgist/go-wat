@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/HenryGeorgist/go-wat/component"
-	"github.com/HenryGeorgist/go-wat/compute"
+	"go-wat/component"
+	"go-wat/compute"
+
 	"github.com/HydrologicEngineeringCenter/go-statistics/data"
 )
 
@@ -29,12 +30,15 @@ type DeterministicConfiguration struct {
 func (d DeterministicConfiguration) ProgramOrder() component.ProgramOrder {
 	return d.Programorder
 }
+
 func (d DeterministicConfiguration) Models() []component.Model {
 	return d.ModelList
 }
+
 func (d DeterministicConfiguration) InputSource() string {
 	return d.Inputsource
 }
+
 func (d DeterministicConfiguration) OutputDestination() string {
 	return d.Outputdestination
 }
@@ -57,12 +61,15 @@ type StochasticConfiguration struct {
 func (s StochasticConfiguration) ProgramOrder() component.ProgramOrder {
 	return s.Programorder
 }
+
 func (s StochasticConfiguration) Models() []component.Model {
 	return s.ModelList
 }
+
 func (s StochasticConfiguration) InputSource() string {
 	return s.Inputsource
 }
+
 func (s StochasticConfiguration) OutputDestination() string {
 	return s.Outputdestination
 }
@@ -87,23 +94,28 @@ func Compute(config Configuration) error {
 				outputvariableHistograms[model.ModelName()] = histogramMap
 			}
 		}
+
 		//loop for realizations
 		rootOutputPath := config.OutputDestination()
 		rootinputPath := config.InputSource()
+
 		eventRandom := component.SeedManager{
 			Seed:        stochastic.InitialEventSeed,
 			PluginCount: len(config.Models()),
 		}
+
 		eventRandom.Init()
 		realizationRandom := component.SeedManager{
 			Seed:        stochastic.InitialRealizationSeed,
 			PluginCount: len(config.Models()),
 		}
+
 		realizationRandom.Init()
+
 		//each realization can be run conccurrently
 		for realization := 0; realization < stochastic.TotalRealizations; realization++ {
-			realizationInputPath := rootinputPath + "realization " + fmt.Sprint(realization) + "/"
-			realizationOutputPath := rootOutputPath + "realization " + fmt.Sprint(realization) + "/"
+			realizationInputPath := fmt.Sprintf("%srealization-%v", rootinputPath, realization)
+			realizationOutputPath := fmt.Sprintf("%srealization-%v", rootOutputPath, realization)
 			//loop for lifecycles
 			realizationSeeds := realizationRandom.GeneratePluginSeeds() //probably make one per model
 			fmt.Println(fmt.Sprintf("Computing realization %v", realization))
@@ -112,15 +124,20 @@ func Compute(config Configuration) error {
 				//events in a lifecycle are dependent on earlier events,
 				//events should not be run concurrently
 				//event generator create events
-				lifecycleInputPath := realizationInputPath + "lifecycle " + fmt.Sprint(lifecycle) + "/"
-				lifecycleOutputPath := realizationOutputPath + "lifecycle " + fmt.Sprint(lifecycle) + "/"
+
+				lifecycleInputPath := fmt.Sprintf("%s/lifecycle-%v", realizationInputPath, lifecycle)
+				lifecycleOutputPath := fmt.Sprintf("%s/lifecycle-%v", realizationOutputPath, lifecycle)
 				//loop for events
 				events := stochastic.EventGenerator.GenerateTimeWindows(stochastic.LifecycleTimeWindow)
 				for eventid, event := range events {
-					stochastic.Inputsource = lifecycleInputPath + "event " + fmt.Sprint(eventid)
-					stochastic.Outputdestination = lifecycleOutputPath + "event " + fmt.Sprint(eventid)
-					_ = os.MkdirAll(stochastic.InputSource(), os.ModeTemporary)
-					_ = os.MkdirAll(stochastic.OutputDestination(), os.ModeTemporary)
+
+					stochastic.Inputsource = fmt.Sprintf("%s/event-%v", lifecycleInputPath, eventid)
+					stochastic.Outputdestination = fmt.Sprintf("%s/event-%v", lifecycleOutputPath, eventid)
+					_ = os.MkdirAll(stochastic.InputSource(), 0600)
+					// if err != nil {
+					// 	fmt.Println (err)
+					// }
+					_ = os.MkdirAll(stochastic.OutputDestination(), 0600)
 					eventSeeds := eventRandom.GeneratePluginSeeds() //probably make one per model
 					seo := compute.StochasticEventOptions{
 						RealizationNumber: realization,

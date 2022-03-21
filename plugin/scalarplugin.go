@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"os"
 
-	"github.com/HenryGeorgist/go-wat/component"
-	"github.com/HenryGeorgist/go-wat/compute"
+	"go-wat/component"
+	"go-wat/compute"
 )
 
 type ScalarPlugin struct {

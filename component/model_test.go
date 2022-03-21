@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/HenryGeorgist/go-wat/component"
-	"github.com/HenryGeorgist/go-wat/plugin"
+	"go-wat/component"
+	"go-wat/plugin"
 )
 
 func TestMarshalModelLinks(t *testing.T) {

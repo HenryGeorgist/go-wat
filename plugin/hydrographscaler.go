@@ -7,13 +7,20 @@ import (
 	"os"
 	"time"
 
-	"github.com/HenryGeorgist/go-wat/component"
-	"github.com/HenryGeorgist/go-wat/compute"
+	"go-wat/component"
+	"go-wat/compute"
+
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 )
 
 type HydrographScalerPlugin struct {
 }
+
+// Name of the model (ras - bc-1)
+// ParentPluginName (hyrdoscalaar plugin)
+// Flows shape set
+// Flow frequency LPIII (or other BootstrappableDistribution)
+// Links are output links (what can I produce)
 type HydrographScalerModel struct {
 	Name             string                                `json:"name"`
 	ParentPluginName string                                `json:"parent_plugin_name"`
@@ -44,6 +51,7 @@ func (hsp HydrographScalerPlugin) Name() string {
 	return "Hydrograph Scaling Plugin"
 }
 func (hsp HydrographScalerPlugin) InputLinks(model component.Model) []component.InputDataLocation {
+	// no links needed here, this serves as a generator in this context
 	ret := make([]component.InputDataLocation, 0)
 	return ret
 }
@@ -73,21 +81,30 @@ func (hsp HydrographScalerPlugin) Compute(model component.Model, options compute
 			r := rand.New(rand.NewSource(stochastic.EventSeeds[options.CurrentModelIndex()]))
 			value = b.InvCDF(r.Float64())
 		}
+
 		//write it to the output destination in some agreed upon format?
 		outputs := hsp.OutputLinks(model)
+
 		for _, o := range outputs {
 			lcsv, _ := o.LinkInfo.(component.LocalCSVLink)
+
 			outputdest := options.OutputDestination + lcsv.Path
+
 			w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+
 			if err != nil {
 				fmt.Println(err)
 			}
+
 			defer w.Close()
+
 			currentTime := options.TimeWindow().StartTime
 			fmt.Fprintln(w, "Time,Flow")
+
 			for _, flow := range hsm.Flows {
 				if options.TimeWindow().EndTime.After(currentTime) {
 					fmt.Fprintln(w, fmt.Sprintf("%v,%v", currentTime, flow*value))
+
 					currentTime = currentTime.Add(hsm.TimeStep)
 				} else {
 					fmt.Println("encountered more flows than the time window.")

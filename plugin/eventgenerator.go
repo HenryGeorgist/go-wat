@@ -3,7 +3,7 @@ package plugin
 import (
 	"time"
 
-	"github.com/HenryGeorgist/go-wat/compute"
+	"go-wat/compute"
 )
 
 type AnnualEventGenerator struct {

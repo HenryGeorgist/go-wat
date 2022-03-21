@@ -1,6 +1,6 @@
 package component
 
-import "github.com/HenryGeorgist/go-wat/compute"
+import "go-wat/compute"
 
 //Computable defines the interface to perform a compute and facilitate links
 type Computable interface {

@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/HenryGeorgist/go-wat/component"
-	"github.com/HenryGeorgist/go-wat/compute"
+	"go-wat/component"
+	"go-wat/compute"
 )
 
 var output float64 = 0.0 //bad form

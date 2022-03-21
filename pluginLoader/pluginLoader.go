@@ -3,7 +3,7 @@ package pluginloader
 import (
 	"errors"
 
-	"github.com/HenryGeorgist/go-wat/component"
+	"go-wat/component"
 )
 
 type PluginRegistry struct {

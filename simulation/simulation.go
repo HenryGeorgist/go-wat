@@ -75,11 +75,14 @@ func (s StochasticConfiguration) OutputDestination() string {
 }
 
 func Compute(config Configuration) error {
-	stochastic, ok := config.(StochasticConfiguration)
+
 	var coptions compute.Options
+
+	stochastic, ok := config.(StochasticConfiguration)
 	if ok {
 		//develop map of map of inline histograms
 		outputvariableHistograms := make(map[string]map[string]*data.InlineHistogram)
+
 		//get output variables by plugin
 		outputvariablesMap := make(map[string][]string)
 		for idx, model := range stochastic.ModelList {
@@ -116,9 +119,12 @@ func Compute(config Configuration) error {
 		for realization := 0; realization < stochastic.TotalRealizations; realization++ {
 			realizationInputPath := fmt.Sprintf("%srealization-%v", rootinputPath, realization)
 			realizationOutputPath := fmt.Sprintf("%srealization-%v", rootOutputPath, realization)
+
 			//loop for lifecycles
 			realizationSeeds := realizationRandom.GeneratePluginSeeds() //probably make one per model
-			fmt.Println(fmt.Sprintf("Computing realization %v", realization))
+			message := fmt.Sprintf("Computing realization %v", realization)
+			fmt.Println(message)
+
 			//each lifecycle can be a job run concurrently
 			for lifecycle := 0; lifecycle < stochastic.LifecyclesPerRealization; lifecycle++ {
 				//events in a lifecycle are dependent on earlier events,
@@ -127,18 +133,32 @@ func Compute(config Configuration) error {
 
 				lifecycleInputPath := fmt.Sprintf("%s/lifecycle-%v", realizationInputPath, lifecycle)
 				lifecycleOutputPath := fmt.Sprintf("%s/lifecycle-%v", realizationOutputPath, lifecycle)
+
 				//loop for events
+
+				err := stochastic.LifecycleTimeWindow.IsValid()
+				if err != nil {
+					return err
+				}
+
 				events := stochastic.EventGenerator.GenerateTimeWindows(stochastic.LifecycleTimeWindow)
+
 				for eventid, event := range events {
 
 					stochastic.Inputsource = fmt.Sprintf("%s/event-%v", lifecycleInputPath, eventid)
 					stochastic.Outputdestination = fmt.Sprintf("%s/event-%v", lifecycleOutputPath, eventid)
-					_ = os.MkdirAll(stochastic.InputSource(), 0600)
-					// if err != nil {
-					// 	fmt.Println (err)
-					// }
-					_ = os.MkdirAll(stochastic.OutputDestination(), 0600)
-					eventSeeds := eventRandom.GeneratePluginSeeds() //probably make one per model
+					err := os.MkdirAll(stochastic.InputSource(), 0600)
+					if err != nil {
+						return err
+					}
+
+					err = os.MkdirAll(stochastic.OutputDestination(), 0600)
+					if err != nil {
+						return err
+					}
+
+					//probably make one per model
+					eventSeeds := eventRandom.GeneratePluginSeeds()
 					seo := compute.StochasticEventOptions{
 						RealizationNumber: realization,
 						LifecycleNumber:   lifecycle,
@@ -156,8 +176,9 @@ func Compute(config Configuration) error {
 					}
 					outputvars, err := computeEvent(config, coptions)
 					if err != nil {
-						panic(err)
+						return err
 					}
+
 					for k, v := range outputvars {
 						histos, ok := outputvariableHistograms[k]
 						if ok {
@@ -207,6 +228,7 @@ func computeEvent(config Configuration, options compute.Options) (map[string][]f
 			return nil, err
 		}
 		options.EventOptions = options.IncrementModelIndex()
+
 		//if the plugin implements the outputrecorder interface, get outputs
 		outputvariables, ok := options.OutputVariables[config.Models()[idx].ModelName()]
 		if ok {

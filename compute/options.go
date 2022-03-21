@@ -1,6 +1,9 @@
 package compute
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 //EventOptions defines the interface for event options, and requires a TimeWindow for the event
 type EventOptions interface {
@@ -14,6 +17,13 @@ type EventOptions interface {
 type TimeWindow struct {
 	StartTime time.Time `json:"starttime"`
 	EndTime   time.Time `json:"endtime"`
+}
+
+func (tw TimeWindow) IsValid() error {
+	if tw.StartTime.Before(tw.EndTime) {
+		return nil
+	}
+	return fmt.Errorf("invalid time window, StarTime %v must be before EndTIme %v", tw.StartTime, tw.EndTime)
 }
 
 //StochasticEventOptions implements EventOptions and adds information about realizations, lifecycles, and events as well as random seeds

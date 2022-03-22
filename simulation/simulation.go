@@ -147,12 +147,12 @@ func Compute(config Configuration) error {
 					stochastic.Inputsource = fmt.Sprintf("%s/event-%v", lifecycleInputPath, eventid)
 					stochastic.Outputdestination = fmt.Sprintf("%s/event-%v", lifecycleOutputPath, eventid)
 
-					err := os.MkdirAll(stochastic.InputSource(), 0600)
+					err := os.MkdirAll(stochastic.InputSource(), os.ModePerm)
 					if err != nil {
 						return err
 					}
 
-					err = os.MkdirAll(stochastic.OutputDestination(), 0600)
+					err = os.MkdirAll(stochastic.OutputDestination(), os.ModePerm)
 					if err != nil {
 						return err
 					}
@@ -216,15 +216,17 @@ func Compute(config Configuration) error {
 			OutputVariables:   outputvariablesMap,
 		}
 
-		err := os.MkdirAll(config.OutputDestination(), 0600)
+		err := os.MkdirAll(config.OutputDestination(), os.ModePerm)
 		if err != nil {
 			return err
 		}
+		// syscall.Umask(0)
 
-		err = os.MkdirAll(config.OutputDestination(), 0600)
+		err = os.MkdirAll(config.OutputDestination(), os.ModePerm)
 		if err != nil {
 			return err
 		}
+		// syscall.Umask(0)
 
 		outputs, err := computeEvent(config, coptions)
 		fmt.Println(outputs)

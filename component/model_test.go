@@ -6,23 +6,23 @@ import (
 	"testing"
 
 	"go-wat/component"
-	"go-wat/plugin"
+	"go-wat/plugins"
 )
 
 func TestMarshalModelLinks(t *testing.T) {
 	//create two scalar plugins
-	spa := plugin.ScalarPlugin{}
-	spb := plugin.ScalarPlugin{}
+	spa := plugins.ScalarPlugin{}
+	spb := plugins.ScalarPlugin{}
 
 	//create two scalar models
-	sma := plugin.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
-	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
+	sma := plugins.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
+	smb := plugins.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
 
 	//create an add plugin
-	ap := plugin.AddPlugin{}
+	ap := plugins.AddPlugin{}
 
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
+	am := plugins.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 
 	//model links
 	aminputs := ap.InputLinks(am)
@@ -44,10 +44,10 @@ func TestMarshalModelLinks(t *testing.T) {
 }
 func TestMarshalInputDataLocation(t *testing.T) {
 	//create an add plugin
-	ap := plugin.AddPlugin{}
+	ap := plugins.AddPlugin{}
 
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
+	am := plugins.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 
 	//model link
 	aminputs := ap.InputLinks(am)
@@ -61,10 +61,10 @@ func TestMarshalInputDataLocation(t *testing.T) {
 }
 func TestMarshalOutputDataLocation(t *testing.T) {
 	//create an add plugin
-	ap := plugin.AddPlugin{}
+	ap := plugins.AddPlugin{}
 
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
+	am := plugins.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 
 	//model link
 	amoutputs := ap.OutputLinks(am)

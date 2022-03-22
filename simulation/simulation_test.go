@@ -8,30 +8,33 @@ import (
 
 	"go-wat/component"
 	"go-wat/compute"
-	"go-wat/plugin"
+	"go-wat/config"
+	"go-wat/plugins"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 )
 
-const (
-	inputDataDir  string = "/workspaces/test-data/"
-	outputDataDir string = "/workspaces/test-data/"
-)
-
 func TestDeterministicSimulation(t *testing.T) {
+
+	testSettings, err := config.LoadTestSettings()
+	fmt.Println("testSettings", testSettings)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	//create two scalar plugins
-	spa := plugin.ScalarPlugin{}
-	spb := plugin.ScalarPlugin{}
+	spa := plugins.ScalarPlugin{}
+	spb := plugins.ScalarPlugin{}
 
 	//create two scalar models
-	sma := plugin.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
-	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 1.0, ParentPluginName: spb.Name()}
+	sma := plugins.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
+	smb := plugins.ScalarModel{Name: "ValueB", DefaultValue: 1.0, ParentPluginName: spb.Name()}
 
 	//create an add plugin
-	ap := plugin.AddPlugin{}
+	ap := plugins.AddPlugin{}
 
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
+	am := plugins.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 
 	//create a program order
 	plugins := make([]component.Computable, 3)
@@ -65,37 +68,43 @@ func TestDeterministicSimulation(t *testing.T) {
 		Programorder:      programOrder,
 		ModelList:         models,
 		TimeWindow:        tw,
-		Outputdestination: outputDataDir,
-		Inputsource:       inputDataDir,
+		Outputdestination: testSettings.OutputDataDir,
+		Inputsource:       testSettings.InputDataDir,
 	}
 
 	// Compute
-	err := Compute(deterministicconfig)
+	err = Compute(deterministicconfig)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 func TestStochasticSimulation(t *testing.T) {
+
+	testSettings, err := config.LoadTestSettings()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	//create two scalar plugins
-	spa := plugin.ScalarPlugin{}
-	spb := plugin.ScalarPlugin{}
+	spa := plugins.ScalarPlugin{}
+	spb := plugins.ScalarPlugin{}
 
 	//create two scalar models
-	sma := plugin.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
-	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
+	sma := plugins.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
+	smb := plugins.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
 
 	//create an add plugin
-	ap := plugin.AddPlugin{}
+	ap := plugins.AddPlugin{}
 
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
+	am := plugins.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 
 	//create a program order
-	plugins := make([]component.Computable, 3)
-	plugins[0] = spa
-	plugins[1] = spb
-	plugins[2] = ap
-	programOrder := component.ProgramOrder{Plugins: plugins}
+	activePlugins := make([]component.Computable, 3)
+	activePlugins[0] = spa
+	activePlugins[1] = spb
+	activePlugins[2] = ap
+	programOrder := component.ProgramOrder{Plugins: activePlugins}
 
 	//model link
 	aminputs := ap.InputLinks(am)
@@ -118,7 +127,7 @@ func TestStochasticSimulation(t *testing.T) {
 	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
 
 	//create an event generator
-	eg := plugin.AnnualEventGenerator{}
+	eg := plugins.AnnualEventGenerator{}
 
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
@@ -130,39 +139,45 @@ func TestStochasticSimulation(t *testing.T) {
 		LifecyclesPerRealization:     3,
 		InitialRealizationSeed:       1234,
 		InitialEventSeed:             1234,
-		Outputdestination:            outputDataDir,
-		Inputsource:                  inputDataDir,
-		DeleteOutputAfterRealization: true,
+		Outputdestination:            testSettings.OutputDataDir,
+		Inputsource:                  testSettings.InputDataDir,
+		DeleteOutputAfterRealization: false,
 	}
 
 	// Compute
-	err := Compute(stochasticconfig)
+	err = Compute(stochasticconfig)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 }
 func TestStochasticSimulation_serialization(t *testing.T) {
+
+	testSettings, err := config.LoadTestSettings()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	//create two scalar plugins
-	spa := plugin.ScalarPlugin{}
-	spb := plugin.ScalarPlugin{}
+	spa := plugins.ScalarPlugin{}
+	spb := plugins.ScalarPlugin{}
 
 	//create two scalar models
-	sma := plugin.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
-	smb := plugin.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
+	sma := plugins.ScalarModel{Name: "ValueA", DefaultValue: 2.0, ParentPluginName: spa.Name()}
+	smb := plugins.ScalarModel{Name: "ValueB", DefaultValue: 2.0, ParentPluginName: spb.Name()}
 
 	//create an add plugin
-	ap := plugin.AddPlugin{}
+	ap := plugins.AddPlugin{}
 
 	//create an add model
-	am := plugin.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
+	am := plugins.AddModel{Name: "APlusB", ParentPluginName: ap.Name()}
 
 	//create a program order
-	plugins := make([]component.Computable, 3)
-	plugins[0] = spa
-	plugins[1] = spb
-	plugins[2] = ap
-	programOrder := component.ProgramOrder{Plugins: plugins}
+	activePlugins := make([]component.Computable, 3)
+	activePlugins[0] = spa
+	activePlugins[1] = spb
+	activePlugins[2] = ap
+	programOrder := component.ProgramOrder{Plugins: activePlugins}
 
 	//model link
 	aminputs := ap.InputLinks(am)
@@ -185,7 +200,7 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
 
 	//create an event generator
-	eg := plugin.AnnualEventGenerator{}
+	eg := plugins.AnnualEventGenerator{}
 
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
@@ -197,8 +212,8 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 		LifecyclesPerRealization: 1,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
-		Outputdestination:        outputDataDir,
-		Inputsource:              inputDataDir,
+		Outputdestination:        testSettings.OutputDataDir,
+		Inputsource:              testSettings.InputDataDir,
 	}
 
 	//compute
@@ -211,14 +226,20 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 
 }
 func TestStochasticSimulation_withHydrograph(t *testing.T) {
+
+	testSettings, err := config.LoadTestSettings()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	//create a hydrograph scaler plugin
-	hsp := plugin.HydrographScalerPlugin{}
+	hsp := plugins.HydrographScalerPlugin{}
 
 	//create a hydrograph scaler model
 	flows := []float64{1.0, 5.0, 2.0, 15.0}
 	flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10}
 
-	hsm := plugin.HydrographScalerModel{
+	hsm := plugins.HydrographScalerModel{
 		Name:             "RASBoundary",
 		ParentPluginName: hsp.Name(),
 		TimeStep:         time.Hour,
@@ -227,10 +248,10 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 	}
 
 	//create a program order
-	plugins := make([]component.Computable, 1)
-	plugins[0] = hsp
+	activePlugins := make([]component.Computable, 1)
+	activePlugins[0] = hsp
 
-	programOrder := component.ProgramOrder{Plugins: plugins}
+	programOrder := component.ProgramOrder{Plugins: activePlugins}
 
 	//model link
 	modelLinks := make([]component.Link, 0)
@@ -247,7 +268,7 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 	tw := compute.TimeWindow{StartTime: time.Date(2006, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
 
 	//create an event generator
-	eg := plugin.AnnualEventGenerator{}
+	eg := plugins.AnnualEventGenerator{}
 
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
@@ -259,8 +280,8 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 		LifecyclesPerRealization: 2,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
-		Outputdestination:        outputDataDir,
-		Inputsource:              inputDataDir,
+		Outputdestination:        testSettings.OutputDataDir,
+		Inputsource:              testSettings.InputDataDir,
 	}
 
 	bytes, err := json.Marshal(stochasticconfig)
@@ -277,3 +298,98 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 	}
 
 }
+
+// func TestStochasticSimulation_withRAS(t *testing.T) {
+// 	testSettings, err := config.LoadTestSettings()
+// if err != nil {
+// 	t.Fatal(err)
+// }
+
+// 	//create a hydrograph scaler plugin
+// 	hsp := plugins.HydrographScalerPlugin{}
+// 	ras := plugins.RasPlugin{}
+
+// 	//create a hydrograph scaler model
+// 	flows := []float64{1.0, 5.0, 2.0}
+
+// 	// May need to create 3 HydrographScalers (depnedning on the muncie example)
+
+// 	flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10}
+
+// 	hsm := plugins.HydrographScalerModel{
+// 		Name:             "RASBoundary",
+// 		ParentPluginName: hsp.Name(),
+// 		TimeStep:         time.Hour,
+// 		Flows:            flows,
+// 		FlowFrequency:    flow_frequency,
+// 	}
+
+// 	rm := plugins.RASModel{
+// 		Name: "Muncie",
+// 		// May need file path
+// 		ParentPluginName: ras.Name(),
+// 		TimeStep:         time.Hour,
+// 		Flows:            flows,
+// 		FlowFrequency:    flow_frequency,
+// 	}
+
+// 	//create a program order
+// 	plugins := make([]component.Computable, 2)
+// 	plugins[0] = hsp
+// 	plugins[1] = ras
+
+// 	programOrder := component.ProgramOrder{Plugins: plugins}
+
+// 	//model link
+// 	rasinputs := ras.InputLinks(rm)
+// 	hsmoutputs := hsp.OutputLinks(hsm)
+
+// 	numBoundaries := len(rasinputs)
+// 	modelLinks := make([]component.Link, numBoundaries)
+// 	modelLinks[0] = component.Link{InputDataLocation: rasinputs[0], OutputDataLocation: hsmoutputs[0]}
+// 	// uncomment and add depneding on # of BC's
+// 	// modelLinks[1] = component.Link{InputDataLocation: aminputs[1], OutputDataLocation: smboutput[0]}
+
+// 	ml := component.ModelLinks{Links: modelLinks}
+// 	rm.Links = ml
+// 	hsm.Links = ml
+
+// 	//set up a model list
+// 	models := make([]component.Model, 2)
+// 	models[0] = hsm
+// 	models[1] = rm
+
+// 	//set up a timewindow
+// 	tw := compute.TimeWindow{StartTime: time.Date(2006, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
+
+// 	//create an event generator
+// 	eg := plugins.AnnualEventGenerator{}
+
+// 	//set up a configuration
+// 	stochasticconfig := StochasticConfiguration{
+// 		Programorder:             programOrder,
+// 		ModelList:                models,
+// 		EventGenerator:           eg,
+// 		LifecycleTimeWindow:      tw,
+// 		TotalRealizations:        1,
+// 		LifecyclesPerRealization: 1,
+// 		InitialRealizationSeed:   1234,
+// 		InitialEventSeed:         1234,
+// Outputdestination: testSettings.OutputDataDir,
+// Inputsource:       testSettings.InputDataDir,
+// 	}
+
+// 	bytes, err := json.Marshal(stochasticconfig)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	} else {
+// 		fmt.Println("StochasticConfiguration: ", string(bytes))
+// 	}
+
+// 	// Compute
+// 	err = Compute(stochasticconfig)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+
+// }

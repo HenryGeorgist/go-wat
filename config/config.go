@@ -6,9 +6,15 @@ import (
 	"os"
 )
 
+type RasModelInfo struct {
+	ProjectFilePath string `json:"project_file_path"`
+	BasePath        string `json:"base_path"`
+}
+
 type TestSettings struct {
-	InputDataDir  string `json:"input_data_directoy"`
-	OutputDataDir string `json:"output_data_directoy"`
+	InputDataDir  string       `json:"input_data_directoy"`
+	OutputDataDir string       `json:"output_data_directoy"`
+	RasModel      RasModelInfo `json:"ras_model_info"`
 }
 
 func LoadTestSettings() (TestSettings, error) {

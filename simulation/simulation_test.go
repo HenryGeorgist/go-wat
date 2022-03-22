@@ -299,97 +299,100 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 
 }
 
-// func TestStochasticSimulation_withRAS(t *testing.T) {
-// 	testSettings, err := config.LoadTestSettings()
-// if err != nil {
-// 	t.Fatal(err)
-// }
+func TestStochasticSimulation_withRAS(t *testing.T) {
+	testSettings, err := config.LoadTestSettings()
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	//create a hydrograph scaler plugin
-// 	hsp := plugins.HydrographScalerPlugin{}
-// 	ras := plugins.RasPlugin{}
+	// Get RAS BC from the Munice model
+	rasBCs, err := plugins.HecRasBCs(testSettings.RasModel)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-// 	//create a hydrograph scaler model
-// 	flows := []float64{1.0, 5.0, 2.0}
+	fmt.Println("rasBCs.........", rasBCs)
 
-// 	// May need to create 3 HydrographScalers (depnedning on the muncie example)
+	// //create a hydrograph scaler plugin
+	// hsp := plugins.HydrographScalerPlugin{}
+	// rp := plugins.RasPlugin{}
 
-// 	flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10}
+	// flow_frequency := statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10}
 
-// 	hsm := plugins.HydrographScalerModel{
-// 		Name:             "RASBoundary",
-// 		ParentPluginName: hsp.Name(),
-// 		TimeStep:         time.Hour,
-// 		Flows:            flows,
-// 		FlowFrequency:    flow_frequency,
-// 	}
+	// hsm := plugins.HydrographScalerModel{
+	// 	Name:             "RASBoundary",
+	// 	ParentPluginName: hsp.Name(),
+	// 	TimeStep:         time.Hour,
+	// 	Flows:            flows,
+	// 	FlowFrequency:    flow_frequency,
+	// }
 
-// 	rm := plugins.RASModel{
-// 		Name: "Muncie",
-// 		// May need file path
-// 		ParentPluginName: ras.Name(),
-// 		TimeStep:         time.Hour,
-// 		Flows:            flows,
-// 		FlowFrequency:    flow_frequency,
-// 	}
+	// rm := plugins.RasModel{
+	// 	Name:             "Muncie",
+	// 	ParentPluginName: rp.Name(),
+	// 	TimeStep:         time.Hour,
+	// 	Flows:            flows,
+	// 	FlowFrequency:    flow_frequency,
+	// }
 
-// 	//create a program order
-// 	plugins := make([]component.Computable, 2)
-// 	plugins[0] = hsp
-// 	plugins[1] = ras
+	// //create a program order
+	// activePlugins := make([]component.Computable, 2)
+	// activePlugins[0] = hsp
+	// activePlugins[1] = rp
 
-// 	programOrder := component.ProgramOrder{Plugins: plugins}
+	// programOrder := component.ProgramOrder{Plugins: activePlugins}
 
-// 	//model link
-// 	rasinputs := ras.InputLinks(rm)
-// 	hsmoutputs := hsp.OutputLinks(hsm)
+	// //model link
+	// rasinputs := rp.InputLinks(rm)
+	// hsmoutputs := hsp.OutputLinks(hsm)
+	// rasoutputs := rp.OutputLinks(rm)
 
-// 	numBoundaries := len(rasinputs)
-// 	modelLinks := make([]component.Link, numBoundaries)
-// 	modelLinks[0] = component.Link{InputDataLocation: rasinputs[0], OutputDataLocation: hsmoutputs[0]}
-// 	// uncomment and add depneding on # of BC's
-// 	// modelLinks[1] = component.Link{InputDataLocation: aminputs[1], OutputDataLocation: smboutput[0]}
+	// numBoundaries := len(rasinputs)
+	// modelLinks := make([]component.Link, numBoundaries)
+	// modelLinks[0] = component.Link{InputDataLocation: rasinputs[0], OutputDataLocation: hsmoutputs[0]}
+	// // uncomment and add depneding on # of BC's
+	// modelLinks[1] = component.Link{InputDataLocation: rasinputs[0], OutputDataLocation: rasoutputs[0]}
 
-// 	ml := component.ModelLinks{Links: modelLinks}
-// 	rm.Links = ml
-// 	hsm.Links = ml
+	// ml := component.ModelLinks{Links: modelLinks}
+	// rm.Links = ml
+	// hsm.Links = ml
 
-// 	//set up a model list
-// 	models := make([]component.Model, 2)
-// 	models[0] = hsm
-// 	models[1] = rm
+	// //set up a model list
+	// models := make([]component.Model, 2)
+	// models[0] = hsm
+	// models[1] = rm
 
-// 	//set up a timewindow
-// 	tw := compute.TimeWindow{StartTime: time.Date(2006, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
+	// //set up a timewindow
+	// tw := compute.TimeWindow{StartTime: time.Date(2006, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
 
-// 	//create an event generator
-// 	eg := plugins.AnnualEventGenerator{}
+	// //create an event generator
+	// eg := plugins.AnnualEventGenerator{}
 
-// 	//set up a configuration
-// 	stochasticconfig := StochasticConfiguration{
-// 		Programorder:             programOrder,
-// 		ModelList:                models,
-// 		EventGenerator:           eg,
-// 		LifecycleTimeWindow:      tw,
-// 		TotalRealizations:        1,
-// 		LifecyclesPerRealization: 1,
-// 		InitialRealizationSeed:   1234,
-// 		InitialEventSeed:         1234,
-// Outputdestination: testSettings.OutputDataDir,
-// Inputsource:       testSettings.InputDataDir,
-// 	}
+	// //set up a configuration
+	// stochasticconfig := StochasticConfiguration{
+	// 	Programorder:             programOrder,
+	// 	ModelList:                models,
+	// 	EventGenerator:           eg,
+	// 	LifecycleTimeWindow:      tw,
+	// 	TotalRealizations:        1,
+	// 	LifecyclesPerRealization: 1,
+	// 	InitialRealizationSeed:   1234,
+	// 	InitialEventSeed:         1234,
+	// 	Outputdestination:        testSettings.OutputDataDir,
+	// 	Inputsource:              testSettings.InputDataDir,
+	// }
 
-// 	bytes, err := json.Marshal(stochasticconfig)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	} else {
-// 		fmt.Println("StochasticConfiguration: ", string(bytes))
-// 	}
+	// bytes, err := json.Marshal(stochasticconfig)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// } else {
+	// 	fmt.Println("StochasticConfiguration: ", string(bytes))
+	// }
 
-// 	// Compute
-// 	err = Compute(stochasticconfig)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+	// // Compute
+	// err = Compute(stochasticconfig)
+	// if err != nil {
+	// 	t.Fatal(err)
+	// }
 
-// }
+}

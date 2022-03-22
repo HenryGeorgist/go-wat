@@ -34,9 +34,11 @@ type HydrographScalerModel struct {
 func (hsm HydrographScalerModel) ModelName() string {
 	return hsm.Name
 }
+
 func (hsm HydrographScalerModel) PluginName() string {
 	return hsm.ParentPluginName
 }
+
 func (hsm HydrographScalerModel) ModelLinkages() component.ModelLinks {
 	return hsm.Links
 }
@@ -47,14 +49,17 @@ func (hsp HydrographScalerPlugin) MarshalJSON() ([]byte, error) {
 	ret := "{\"plugin_name\":\"" + hsp.Name() + "\"}"
 	return []byte(ret), nil
 }
+
 func (hsp HydrographScalerPlugin) Name() string {
 	return "Hydrograph Scaling Plugin"
 }
+
 func (hsp HydrographScalerPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	// no links needed here, this serves as a generator in this context
 	ret := make([]component.InputDataLocation, 0)
 	return ret
 }
+
 func (hsp HydrographScalerPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
@@ -68,6 +73,7 @@ func (hsp HydrographScalerPlugin) OutputLinks(model component.Model) []component
 	ret = append(ret, output)
 	return ret
 }
+
 func (hsp HydrographScalerPlugin) Compute(model component.Model, options compute.Options) error {
 	hsm, hsmok := model.(HydrographScalerModel)
 	if hsmok {

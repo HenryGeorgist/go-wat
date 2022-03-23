@@ -13,12 +13,7 @@ import (
 
 	"github.com/USACE/filestore"
 	"github.com/USACE/mcat-ras/tools"
-	// "github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 )
-
-// Need some converter to pull this from text
-// Using this as a place holder, which will fail on any model that has anything other than 1Hour
-var rasIntervals map[string]float64 = map[string]float64{"1HOUR": 1}
 
 type RasPlugin struct {
 }
@@ -30,7 +25,68 @@ type RasBoundaryConditions struct {
 	//Flows    []float64 `json:"flows"`
 }
 
-// HecRasBCs is a placeholder utility funciton for reading data from models
+// Need some converter to pull this from text
+// Using this as a place holder, which will fail on any model that has anything other than 1Hour
+var rasIntervals map[string]float64 = map[string]float64{"1HOUR": 1}
+
+func extractTimeInterval(s string) (float64, error) {
+
+	rawText := strings.Trim(s, "\r")
+	textLineParts := strings.Split(rawText, "=")
+	if len(textLineParts) < 2 {
+		return 0, fmt.Errorf("extractTimeInterval error: insufficient data from text file line")
+	}
+
+	if _, found := rasIntervals[textLineParts[1]]; !found {
+		return 0, fmt.Errorf("extractTimeInterval error: unknown timestep, please add to `rasIntervals` in `ras.go`")
+	}
+
+	numericInterval := rasIntervals[textLineParts[1]]
+	return numericInterval, nil
+
+}
+
+func extractNumberTimeSteps(s string) (int, error) {
+
+	rawText := strings.Trim(s, "\r")
+
+	textLineParts := strings.Split(rawText, "=")
+	if len(textLineParts) < 2 {
+		return 0, fmt.Errorf("extractNumberTimeSteps error: unrecognized data from text file line")
+	}
+
+	stepsNumeric, err := strconv.Atoi(strings.Trim(textLineParts[1], " "))
+	if err != nil {
+		return 0, err
+	}
+
+	return stepsNumeric, nil
+}
+
+func extractBCName(s string) (string, error) {
+
+	rawText := strings.Trim(s, "\r")
+	textLineParts := strings.Split(rawText, "=")
+	if len(textLineParts) < 2 {
+		return "", fmt.Errorf("extractBCName error: unrecognized data from text file line")
+	}
+
+	lineValues := strings.Split(textLineParts[1], ",")
+	var fullBCName string = strings.Trim(lineValues[0], " ")
+	for i, text := range lineValues {
+		// Todo: Need to verify how BC's  are stored / nomenclature convention for this
+		// currently this function strips white space from `Boundary Location` line and concatenates values with textData (skipping empty spaces)
+		// i.e. `Boundary Location=White           ,Muncie          ,15696.24,        ,                ,                ,                , `
+		// is returned as `White-Muncie-15696.24`
+		textData := strings.Trim(text, " ")
+		if i > 0 && textData != "" {
+			fullBCName += "-" + textData
+		}
+	}
+	return fullBCName, nil
+}
+
+// hecRasBCs is a placeholder utility funciton for reading data from models
 func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 
 	var rbc RasBoundaryConditions
@@ -71,21 +127,29 @@ func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 
 					if nextLine == "Interval" {
 
-						rbc.BCLine = strings.Trim(line, "\r")
-
-						intervalText := strings.Trim(strings.Split(lines[i+1], "=")[1], " \r")
-						numericInterval := rasIntervals[intervalText]
-						rbc.Interval = numericInterval
-
-						stepsText := strings.Trim(strings.Split(lines[i+2], "=")[1], " \r")
-						stepsNumeric, err := strconv.Atoi(stepsText)
+						bcLineName, err := extractBCName(line)
 						if err != nil {
 							return rbc, err
 						}
+
+						numericInterval, err := extractTimeInterval(lines[i+1])
+						if err != nil {
+							return rbc, err
+						}
+
+						stepsNumeric, err := extractNumberTimeSteps(lines[i+2])
+						if err != nil {
+							return rbc, err
+						}
+
+						rbc.BCLine = bcLineName
+						rbc.Interval = numericInterval
 						rbc.Steps = stepsNumeric
 
-						//rbc.Flows = flows
 						rbcs = append(rbcs, rbc)
+
+						fmt.Println("bcLineName", bcLineName)
+
 					} else {
 						continue
 					}
@@ -127,6 +191,7 @@ func (rm RasModel) ModelLinkages() component.ModelLinks {
 }
 
 // Get input list of BC's from a plan u file...
+// Input data locations: boundary conditions names
 func (rp RasPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 1)
 	rm, rmok := model.(RasModel)
@@ -139,7 +204,7 @@ func (rp RasPlugin) InputLinks(model component.Model) []component.InputDataLocat
 			panic(err)
 		}
 		idl := component.InputDataLocation{
-			Name:      rm.Name + " " + rbcs.BCLine,
+			Name:      rbcs.BCLine,
 			Parameter: "flow",
 			Format:    "csv",
 		}
@@ -169,5 +234,6 @@ func (rp RasPlugin) OutputLinks(model component.Model) []component.OutputDataLoc
 }
 
 func (rp RasPlugin) Compute(model component.Model, options option.Options) error {
+	// get model link, read file, pull foats write to model...
 	return nil
 }

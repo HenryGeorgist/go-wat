@@ -65,7 +65,7 @@ func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 				lineData := strings.Split(line, "=")
 
 				switch lineData[0] {
-				// Todo: make this work on any model, not just Muncy!
+				// Todo: make this work on any model, not just muncie!
 				case "Boundary Location":
 					nextLine := strings.Split(lines[i+1], "=")[0]
 
@@ -95,7 +95,7 @@ func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 
 	}
 
-	// Configured to use the muncy model for demo purposes only
+	// Configured to use the muncie model for demo purposes only
 	// grabbing the firstBC info from u01 | p04, using hard coded flows
 	return rbcs[0], nil
 

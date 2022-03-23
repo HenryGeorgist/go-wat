@@ -11,13 +11,15 @@ type SeedManager struct {
 func (sm *SeedManager) Init() {
 	sm.rng = rand.New(rand.NewSource(uint64(sm.Seed)))
 }
+
 func (sm *SeedManager) AdvanceTo(iteration int) {
-	skippedseeds := iteration * sm.PluginCount
+	skippedSeeds := iteration * sm.PluginCount
 	sm.rng = rand.New(rand.NewSource(uint64(sm.Seed)))
-	for i := 0; i < skippedseeds; i++ {
+	for i := 0; i < skippedSeeds; i++ {
 		sm.rng.Int63()
 	}
 }
+
 func (sm *SeedManager) GeneratePluginSeeds() []int64 {
 	seeds := make([]int64, sm.PluginCount)
 	for i := 0; i < int(sm.PluginCount); i++ {

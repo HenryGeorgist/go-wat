@@ -12,6 +12,7 @@ import (
 
 type ScalarPlugin struct {
 }
+
 type ScalarModel struct {
 	Name             string               `json:"name"`
 	ParentPluginName string               `json:"parent_plugin_name"`
@@ -22,23 +23,29 @@ type ScalarModel struct {
 func (sm ScalarModel) ModelName() string {
 	return sm.Name
 }
+
 func (sm ScalarModel) PluginName() string {
 	return sm.ParentPluginName
 }
+
 func (sm ScalarModel) ModelLinkages() component.ModelLinks {
 	return sm.Links
 }
+
 func (s ScalarPlugin) Name() string {
 	return "Scalar Plugin"
 }
+
 func (s ScalarPlugin) MarshalJSON() ([]byte, error) {
 	ret := "{\"plugin_name\":\"" + s.Name() + "\"}"
 	return []byte(ret), nil
 }
+
 func (s ScalarPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	return ret
 }
+
 func (s ScalarPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
@@ -51,6 +58,7 @@ func (s ScalarPlugin) OutputLinks(model component.Model) []component.OutputDataL
 	ret = append(ret, output)
 	return ret
 }
+
 func (s ScalarPlugin) Compute(model component.Model, options compute.Options) error {
 	sm, smok := model.(ScalarModel)
 	if smok {

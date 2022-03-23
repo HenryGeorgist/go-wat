@@ -16,11 +16,6 @@ import (
 type HydrographScalerPlugin struct {
 }
 
-// Name of the model (ras - bc-1)
-// ParentPluginName (hyrdoscalaar plugin)
-// Flows shape set
-// Flow frequency LPIII (or other BootstrappableDistribution)
-// Links are output links (what can I produce)
 type HydrographScalerModel struct {
 	Name             string                                `json:"name"`
 	ParentPluginName string                                `json:"parent_plugin_name"`

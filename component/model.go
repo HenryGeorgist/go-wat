@@ -11,6 +11,7 @@ type Model interface {
 type ModelLinks struct {
 	Links []Link `json:"links"`
 }
+
 type Link struct {
 	InputDataLocation  `json:"input"`
 	OutputDataLocation `json:"output"`

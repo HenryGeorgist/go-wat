@@ -9,6 +9,7 @@ import (
 
 type GoConsequencesPlugin struct {
 }
+
 type GoConsequencesModel struct {
 	Name                   string               `json:"name"`
 	ParentPluginName       string               `json:"parent_plugin_name"`
@@ -21,19 +22,24 @@ type GoConsequencesModel struct {
 func (gcm GoConsequencesModel) ModelName() string {
 	return gcm.Name
 }
+
 func (gcm GoConsequencesModel) PluginName() string {
 	return gcm.ParentPluginName
 }
+
 func (gcp GoConsequencesPlugin) MarshalJSON() ([]byte, error) {
 	ret := "{\"plugin_name\":\"" + gcp.Name() + "\"}"
 	return []byte(ret), nil
 }
+
 func (gcm GoConsequencesModel) ModelLinkages() component.ModelLinks {
 	return gcm.Links
 }
+
 func (gcp GoConsequencesPlugin) Name() string {
 	return "go-consequences Plugin"
 }
+
 func (gcp GoConsequencesPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 0)
 	terrain := component.InputDataLocation{
@@ -41,15 +47,18 @@ func (gcp GoConsequencesPlugin) InputLinks(model component.Model) []component.In
 		Parameter: "Elevation",
 		Format:    "geotif",
 	}
+
 	rasHDFOutput := component.InputDataLocation{
 		Name:      "HEC-RAS HDF output",
 		Parameter: "Depth",
 		Format:    "HDF",
 	}
+
 	ret = append(ret, terrain)
 	ret = append(ret, rasHDFOutput)
 	return ret
 }
+
 func (gcp GoConsequencesPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
@@ -63,6 +72,7 @@ func (gcp GoConsequencesPlugin) OutputLinks(model component.Model) []component.O
 	ret = append(ret, output)
 	return ret
 }
+
 func (gcp GoConsequencesPlugin) Compute(model component.Model, options compute.Options) error {
 	//get terrain and hdf from HEC-RAS
 	//load inventory

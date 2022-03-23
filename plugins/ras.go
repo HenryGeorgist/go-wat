@@ -3,6 +3,7 @@ package plugins
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,10 +20,10 @@ type RasPlugin struct {
 }
 
 type RasBoundaryConditions struct {
-	BCLine   string  `json:"bc_line"`
-	Interval float64 `json:"interval"`
-	Steps    int     `json:"steps"`
-	//Flows    []float64 `json:"flows"`
+	BCLine     string    `json:"bc_line"`
+	Interval   float64   `json:"interval"`
+	Steps      int       `json:"steps"`
+	Hydrograph []float64 `json:"hydrograph"`
 }
 
 // Need some converter to pull this from text
@@ -86,6 +87,31 @@ func extractBCName(s string) (string, error) {
 	return fullBCName, nil
 }
 
+func extractHydrograph(ss []string) ([]float64, error) {
+	var start int
+	var stride int = 8
+	var ordinates int = 10
+	var data []float64
+
+	for _, lineValues := range ss {
+		start = 0
+		for i := 1; i <= ordinates; i++ {
+			if len(string(lineValues)) > start+stride {
+
+				val, err := strconv.ParseFloat(strings.TrimSpace(lineValues[start:start+stride]), 64)
+				if err != nil {
+					return data, err
+				}
+				data = append(data, val)
+				start += stride
+			} else {
+				continue
+			}
+		}
+	}
+	return data, nil
+}
+
 // hecRasBCs is a placeholder utility funciton for reading data from models
 func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 
@@ -142,13 +168,20 @@ func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 							return rbc, err
 						}
 
+						// Parse block of hydrograph ords from text file
+						startLine := i + 3
+						nTextLines := math.Ceil(float64(stepsNumeric) / 10)
+						hydrograph, err := extractHydrograph(lines[startLine : startLine+int(nTextLines)])
+						if err != nil {
+							return rbc, err
+						}
+
 						rbc.BCLine = bcLineName
 						rbc.Interval = numericInterval
 						rbc.Steps = stepsNumeric
+						rbc.Hydrograph = hydrograph
 
 						rbcs = append(rbcs, rbc)
-
-						fmt.Println("bcLineName", bcLineName)
 
 					} else {
 						continue
@@ -234,6 +267,15 @@ func (rp RasPlugin) OutputLinks(model component.Model) []component.OutputDataLoc
 }
 
 func (rp RasPlugin) Compute(model component.Model, options option.Options) error {
-	// get model link, read file, pull foats write to model...
+	links := model.ModelLinkages()
+
+	for i, link := range links.Links {
+		fmt.Println("LINK | ", i, link)
+		lcsv, linkok := link.OutputDataLocation.LinkInfo.(component.LocalCSVLink)
+		if linkok {
+			fmt.Println("Link ok....", lcsv)
+		}
+
+	}
 	return nil
 }

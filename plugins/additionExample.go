@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"go-wat/component"
-	"go-wat/compute"
+	"go-wat/option"
 )
 
 var output float64 = 0.0 // bad form
@@ -73,7 +73,7 @@ func (ap AddPlugin) OutputLinks(model component.Model) []component.OutputDataLoc
 	return ret
 }
 
-func (ap AddPlugin) Compute(model component.Model, options compute.Options) error {
+func (ap AddPlugin) Compute(model component.Model, options option.Options) error {
 	//model.ModelLinkages[]
 	valueA := 0.0
 	valueB := 0.0

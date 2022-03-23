@@ -1,16 +1,14 @@
-package plugins
+package option
 
 import (
 	"time"
-
-	"go-wat/compute"
 )
 
 type AnnualEventGenerator struct {
 }
 
-func (a AnnualEventGenerator) GenerateTimeWindows(t compute.TimeWindow) []compute.TimeWindow {
-	timewindows := make([]compute.TimeWindow, 0)
+func (a AnnualEventGenerator) GenerateTimeWindows(t TimeWindow) []TimeWindow {
+	timewindows := make([]TimeWindow, 0)
 	eventsToGenerate := (t.EndTime.Year() - t.StartTime.Year())
 	year := t.StartTime.Year()
 	for i := 0; i < eventsToGenerate; i++ {
@@ -22,7 +20,7 @@ func (a AnnualEventGenerator) GenerateTimeWindows(t compute.TimeWindow) []comput
 		if i == eventsToGenerate-1 {
 			eventtwend = t.EndTime
 		}
-		tw := compute.TimeWindow{
+		tw := TimeWindow{
 			StartTime: eventtwstart,
 			EndTime:   eventtwend,
 		}

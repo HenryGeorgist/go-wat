@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"go-wat/component"
-	"go-wat/compute"
+	"go-wat/option"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/data"
 )
@@ -22,7 +22,7 @@ type Configuration interface {
 type DeterministicConfiguration struct {
 	Programorder      component.ProgramOrder `json:"programorder"`
 	ModelList         []component.Model      `json:"models"`
-	TimeWindow        compute.TimeWindow     `json:"timewindow"`
+	TimeWindow        option.TimeWindow      `json:"timewindow"`
 	Outputdestination string                 `json:"outputdestination"`
 	Inputsource       string                 `json:"inputsource"`
 }
@@ -48,7 +48,7 @@ type StochasticConfiguration struct {
 	Programorder                 component.ProgramOrder   `json:"programorder"`
 	ModelList                    []component.Model        `json:"models"`
 	EventGenerator               component.EventGenerator `json:"eventgenerator"`
-	LifecycleTimeWindow          compute.TimeWindow       `json:"timewindow"`
+	LifecycleTimeWindow          option.TimeWindow        `json:"timewindow"`
 	TotalRealizations            int                      `json:"totalrealizations"`
 	LifecyclesPerRealization     int                      `json:"lifecyclesperrealization"`
 	InitialRealizationSeed       int64                    `json:"initialrealizationseed"`
@@ -76,7 +76,7 @@ func (s StochasticConfiguration) OutputDestination() string {
 
 func Compute(config Configuration) error {
 
-	var coptions compute.Options
+	var coptions option.Options
 
 	stochastic, ok := config.(StochasticConfiguration)
 	if ok {
@@ -102,13 +102,13 @@ func Compute(config Configuration) error {
 		rootOutputPath := config.OutputDestination()
 		rootinputPath := config.InputSource()
 
-		eventRandom := component.SeedManager{
+		eventRandom := option.SeedManager{
 			Seed:        stochastic.InitialEventSeed,
 			PluginCount: len(config.Models()),
 		}
 
 		eventRandom.Init()
-		realizationRandom := component.SeedManager{
+		realizationRandom := option.SeedManager{
 			Seed:        stochastic.InitialRealizationSeed,
 			PluginCount: len(config.Models()),
 		}
@@ -159,7 +159,7 @@ func Compute(config Configuration) error {
 
 					//probably make one per model
 					eventSeeds := eventRandom.GeneratePluginSeeds()
-					seo := compute.StochasticEventOptions{
+					seo := option.StochasticEventOptions{
 						RealizationNumber: realization,
 						LifecycleNumber:   lifecycle,
 						EventNumber:       eventid,
@@ -168,7 +168,7 @@ func Compute(config Configuration) error {
 						EventTimeWindow:   event,
 						CurrentModel:      0,
 					}
-					coptions = compute.Options{
+					coptions = option.Options{
 						InputSource:       stochastic.InputSource(),
 						OutputDestination: stochastic.OutputDestination(),
 						EventOptions:      seo,
@@ -207,9 +207,9 @@ func Compute(config Configuration) error {
 		outputvariablesMap := make(map[string][]string)
 		deterministic, _ := config.(DeterministicConfiguration)
 
-		deo := compute.DeterministicEventOptions{EventTimeWindow: deterministic.TimeWindow}
+		deo := option.DeterministicEventOptions{EventTimeWindow: deterministic.TimeWindow}
 
-		coptions = compute.Options{
+		coptions = option.Options{
 			InputSource:       config.InputSource(),
 			OutputDestination: config.OutputDestination(),
 			EventOptions:      deo,
@@ -236,7 +236,7 @@ func Compute(config Configuration) error {
 }
 
 //computeEvent iterates over the program order and requests each plugin to compute the associated model in the model list.
-func computeEvent(config Configuration, options compute.Options) (map[string][]float64, error) {
+func computeEvent(config Configuration, options option.Options) (map[string][]float64, error) {
 	outputvariablemap := make(map[string][]float64)
 	for idx, p := range config.ProgramOrder().Plugins {
 		err := p.Compute(config.Models()[idx], options)

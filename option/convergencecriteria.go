@@ -1,4 +1,4 @@
-package component
+package option
 
 //this should probably live in go-statistics with inline histogram.
 type ConvergenceCriteria struct {

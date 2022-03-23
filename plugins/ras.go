@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"go-wat/component"
-	"go-wat/compute"
 	"go-wat/config"
+	"go-wat/option"
 
 	"github.com/USACE/filestore"
 	"github.com/USACE/mcat-ras/tools"
@@ -168,6 +168,6 @@ func (rp RasPlugin) OutputLinks(model component.Model) []component.OutputDataLoc
 	return ret
 }
 
-func (rp RasPlugin) Compute(model component.Model, options compute.Options) error {
+func (rp RasPlugin) Compute(model component.Model, options option.Options) error {
 	return nil
 }

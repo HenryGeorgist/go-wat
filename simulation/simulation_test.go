@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"go-wat/component"
-	"go-wat/compute"
 	"go-wat/config"
+	"go-wat/option"
 	"go-wat/plugins"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
@@ -61,7 +61,7 @@ func TestDeterministicSimulation(t *testing.T) {
 	models[2] = am
 
 	//set up a timewindow
-	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
+	tw := option.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
 
 	//set up a configuration
 	deterministicconfig := DeterministicConfiguration{
@@ -124,10 +124,10 @@ func TestStochasticSimulation(t *testing.T) {
 	models[2] = am
 
 	//set up a timewindow
-	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
+	tw := option.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
 
 	//create an event generator
-	eg := plugins.AnnualEventGenerator{}
+	eg := option.AnnualEventGenerator{}
 
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
@@ -197,10 +197,10 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 	models[2] = am
 
 	//set up a timewindow
-	tw := compute.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
+	tw := option.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, 1, 1, 1, 1, 1, 1, time.Local)}
 
 	//create an event generator
-	eg := plugins.AnnualEventGenerator{}
+	eg := option.AnnualEventGenerator{}
 
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{
@@ -265,10 +265,10 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 	models[0] = hsm
 
 	//set up a timewindow
-	tw := compute.TimeWindow{StartTime: time.Date(2006, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
+	tw := option.TimeWindow{StartTime: time.Date(2006, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
 
 	//create an event generator
-	eg := plugins.AnnualEventGenerator{}
+	eg := option.AnnualEventGenerator{}
 
 	//set up a configuration
 	stochasticconfig := StochasticConfiguration{

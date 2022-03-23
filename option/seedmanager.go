@@ -1,4 +1,4 @@
-package component
+package option
 
 import "golang.org/x/exp/rand"
 

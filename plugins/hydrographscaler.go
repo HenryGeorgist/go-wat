@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"go-wat/component"
-	"go-wat/compute"
+	"go-wat/option"
 
 	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 )
@@ -69,11 +69,11 @@ func (hsp HydrographScalerPlugin) OutputLinks(model component.Model) []component
 	return ret
 }
 
-func (hsp HydrographScalerPlugin) Compute(model component.Model, options compute.Options) error {
+func (hsp HydrographScalerPlugin) Compute(model component.Model, options option.Options) error {
 	hsm, hsmok := model.(HydrographScalerModel)
 	if hsmok {
 		value := 1.0
-		stochastic, ok := options.EventOptions.(compute.StochasticEventOptions)
+		stochastic, ok := options.EventOptions.(option.StochasticEventOptions)
 		if ok {
 			//use a seed!
 			//bootstrap first (this is inefficient because it should only happen once per realization)

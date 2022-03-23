@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"go-wat/component"
-	"go-wat/compute"
+	"go-wat/option"
 )
 
 type GoConsequencesPlugin struct {
@@ -73,7 +73,7 @@ func (gcp GoConsequencesPlugin) OutputLinks(model component.Model) []component.O
 	return ret
 }
 
-func (gcp GoConsequencesPlugin) Compute(model component.Model, options compute.Options) error {
+func (gcp GoConsequencesPlugin) Compute(model component.Model, options option.Options) error {
 	//get terrain and hdf from HEC-RAS
 	//load inventory
 	//set output location based on compute options.

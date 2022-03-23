@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"go-wat/component"
-	"go-wat/compute"
+	"go-wat/option"
 )
 
 type ScalarPlugin struct {
@@ -59,11 +59,11 @@ func (s ScalarPlugin) OutputLinks(model component.Model) []component.OutputDataL
 	return ret
 }
 
-func (s ScalarPlugin) Compute(model component.Model, options compute.Options) error {
+func (s ScalarPlugin) Compute(model component.Model, options option.Options) error {
 	sm, smok := model.(ScalarModel)
 	if smok {
 		value := sm.DefaultValue
-		stochastic, ok := options.EventOptions.(compute.StochasticEventOptions)
+		stochastic, ok := options.EventOptions.(option.StochasticEventOptions)
 		if ok {
 			//use a seed!
 			r := rand.New(rand.NewSource(stochastic.EventSeeds[options.CurrentModelIndex()]))

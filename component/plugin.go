@@ -1,11 +1,11 @@
 package component
 
-import "go-wat/compute"
+import "go-wat/option"
 
 //Computable defines the interface to perform a compute and facilitate links
 type Computable interface {
 	Name() string
-	Compute(model Model, options compute.Options) error
+	Compute(model Model, options option.Options) error
 	InputLinks(model Model) []InputDataLocation
 	OutputLinks(model Model) []OutputDataLocation
 }
@@ -18,5 +18,5 @@ type OutputReporter interface {
 
 //EventGenerator is an additional interface to generate timewindows for a lifecycle
 type EventGenerator interface {
-	GenerateTimeWindows(timewindow compute.TimeWindow) []compute.TimeWindow
+	GenerateTimeWindows(timewindow option.TimeWindow) []option.TimeWindow
 }

@@ -157,10 +157,10 @@ func (rp RasPlugin) Name() string {
 func (rp RasPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
-		Name:                 "Hydrograph",
-		Parameter:            "Flow",
-		Format:               "Array",
-		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.csv", model.ModelName())},
+		Name:                 model.ModelName() + " output hdf file",
+		Parameter:            "RAS output",
+		Format:               "HDF",
+		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.hdf", model.ModelName())}, //this is not quite right
 		GeneratingModelName:  model.ModelName(),
 		GeneratingPluginName: rp.Name(),
 	}

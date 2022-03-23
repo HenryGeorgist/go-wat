@@ -304,12 +304,15 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	rp := plugins.RasPlugin{}
 	// Get RAS BC from the Munice model
-	rasBCs, err := plugins.HecRasBCs(testSettings.RasModel)
-	if err != nil {
-		t.Fatal(err)
+	rm := plugins.RasModel{
+		ProjectFilePath:  testSettings.RasModel.ProjectFilePath,
+		BasePath:         testSettings.RasModel.BasePath,
+		Name:             "Muncie",
+		ParentPluginName: rp.Name(),
 	}
+	rasBCs := rp.InputLinks(rm)
 
 	fmt.Println("rasBCs.........", rasBCs)
 	// 	Hard coded (pulled) from Muncie model for demo purposes

@@ -6,13 +6,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"go-wat/component"
 	"go-wat/compute"
 	"go-wat/config"
 
-	"github.com/HydrologicEngineeringCenter/go-statistics/statistics"
 	"github.com/USACE/filestore"
 	"github.com/USACE/mcat-ras/tools"
 	// "github.com/HydrologicEngineeringCenter/go-statistics/statistics"
@@ -22,26 +20,18 @@ import (
 // Using this as a place holder, which will fail on any model that has anything other than 1Hour
 var rasIntervals map[string]float64 = map[string]float64{"1HOUR": 1}
 
-// 	Hard coded (pulled) from Muncie model for demo purposes
-var flows []float64 = []float64{13500, 14000, 14500, 15000, 15500, 16000, 16500, 17000, 17500, 18000, 18500, 19000,
-	19500, 20000, 20500, 21000, 21000, 21000, 21000, 21000, 21000, 20500, 20000, 19500,
-	19000, 18500, 18000, 17500, 17000, 16500, 16000, 15500, 15000, 14583.33, 14166.67, 13750,
-	13333.33, 12916.67, 1250012083.33, 11666.67, 11250, 10833.33, 10416.67, 10000, 9666.67, 9333.33,
-	9000, 8666.67, 8333.33, 8000, 7666.67, 7333.33, 7000, 6666.67, 6333.33, 6000, 5875, 5750, 5625,
-	5500, 5375, 5250, 5125, 5000}
-
 type RasPlugin struct {
 }
 
 type RasBoundaryConditions struct {
-	BCLine   string    `json:"bc_line"`
-	Interval float64   `json:"interval"`
-	Steps    int       `json:"steps"`
-	Flows    []float64 `json:"flows"`
+	BCLine   string  `json:"bc_line"`
+	Interval float64 `json:"interval"`
+	Steps    int     `json:"steps"`
+	//Flows    []float64 `json:"flows"`
 }
 
 // HecRasBCs is a placeholder utility funciton for reading data from models
-func HecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
+func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 
 	var rbc RasBoundaryConditions
 	fs, err := filestore.NewFileStore(filestore.BlockFSConfig{})
@@ -94,7 +84,7 @@ func HecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 						}
 						rbc.Steps = stepsNumeric
 
-						rbc.Flows = flows
+						//rbc.Flows = flows
 						rbcs = append(rbcs, rbc)
 					} else {
 						continue
@@ -111,18 +101,15 @@ func HecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 
 }
 
-// Name of the model (ras - bc-1)
-// ParentPluginName (hyrdoscalaar plugin)
-// Flows shape set
-// Flow frequency LPIII (or other BootstrappableDistribution)
+// Name of the model (Muncie)
+// ParentPluginName (ras plugin)
 // Links are output links (what can I produce)
 type RasModel struct {
-	Name             string                                `json:"name"`
-	ParentPluginName string                                `json:"parent_plugin_name"`
-	Flows            []float64                             `json:"flows"`
-	TimeStep         time.Duration                         `json:"timestep"`
-	FlowFrequency    statistics.BootstrappableDistribution `json:"flow_frequency"`
-	Links            component.ModelLinks                  `json:"-"`
+	Name             string               `json:"name"`
+	BasePath         string               `json:"basepath"`
+	ProjectFilePath  string               `json:"projectfile"`
+	ParentPluginName string               `json:"parent_plugin_name"`
+	Links            component.ModelLinks `json:"-"`
 }
 
 //model implementation
@@ -139,10 +126,26 @@ func (rm RasModel) ModelLinkages() component.ModelLinks {
 	return rm.Links
 }
 
-// Get input list of BC's from a plan from HDF...
+// Get input list of BC's from a plan u file...
 func (rp RasPlugin) InputLinks(model component.Model) []component.InputDataLocation {
-	// no links needed here, this serves as a generator in this context
-	ret := make([]component.InputDataLocation, 0)
+	ret := make([]component.InputDataLocation, 1)
+	rm, rmok := model.(RasModel)
+	if rmok {
+		rbcs, err := hecRasBCs(config.RasModelInfo{
+			BasePath:        rm.BasePath,
+			ProjectFilePath: rm.ProjectFilePath,
+		})
+		if err != nil {
+			panic(err)
+		}
+		idl := component.InputDataLocation{
+			Name:      rm.Name + " " + rbcs.BCLine,
+			Parameter: "flow",
+			Format:    "csv",
+		}
+		ret[0] = idl
+	}
+
 	return ret
 }
 

@@ -220,13 +220,11 @@ func Compute(config Configuration) error {
 		if err != nil {
 			return err
 		}
-		// syscall.Umask(0)
 
 		err = os.MkdirAll(config.OutputDestination(), os.ModePerm)
 		if err != nil {
 			return err
 		}
-		// syscall.Umask(0)
 
 		outputs, err := computeEvent(config, coptions)
 		fmt.Println(outputs)

@@ -75,8 +75,8 @@ func TestStochasticSimulation(t *testing.T) {
 		ModelList:                    models,
 		EventGenerator:               eg,
 		LifecycleTimeWindow:          tw,
-		TotalRealizations:            3,
-		LifecyclesPerRealization:     2,
+		TotalRealizations:            2,
+		LifecyclesPerRealization:     1,
 		InitialRealizationSeed:       1234,
 		InitialEventSeed:             1234,
 		Outputdestination:            testSettings.OutputDataDir,
@@ -152,7 +152,7 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 		ModelList:                models,
 		EventGenerator:           eg,
 		LifecycleTimeWindow:      tw,
-		TotalRealizations:        1,
+		TotalRealizations:        2,
 		LifecyclesPerRealization: 1,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
@@ -229,8 +229,8 @@ func TestStochasticSimulation_withHydrograph(t *testing.T) {
 		ModelList:                models,
 		EventGenerator:           eg,
 		LifecycleTimeWindow:      tw,
-		TotalRealizations:        3,
-		LifecyclesPerRealization: 2,
+		TotalRealizations:        2,
+		LifecyclesPerRealization: 1,
 		InitialRealizationSeed:   1234,
 		InitialEventSeed:         1234,
 		Outputdestination:        testSettings.OutputDataDir,
@@ -265,17 +265,18 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	rp := plugins.RasPlugin{}
 
 	// Create a program execution order
-	activePlugins := make([]component.Computable, 3)
+	activePlugins := make([]component.Computable, 2)
 	activePlugins[0] = hsp
 	activePlugins[1] = rp
 	programOrder := component.ProgramOrder{Plugins: activePlugins}
 
 	// Create simulation models
 	rm := plugins.RasModel{
-		ProjectFilePath:  testSettings.RasModel.ProjectFilePath,
-		BasePath:         testSettings.RasModel.BasePath,
 		Name:             "Muncie",
+		BasePath:         testSettings.RasModel.BasePath,
+		ProjectFilePath:  testSettings.RasModel.ProjectFilePath,
 		ParentPluginName: rp.Name(),
+		Links:            component.ModelLinks{},
 	}
 
 	// Create simulation models with test data
@@ -293,16 +294,16 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	}
 
 	// Assign links to pair models with plugins
-	rasBCs := rp.InputLinks(rm)
+	rminputs := rp.InputLinks(rm)
 	hsmoutputs := hsp.OutputLinks(hsm)
-
-	fmt.Println("rasBCs.........", rasBCs)
+	// rmoutputs := rp.OutputLinks(rm)
 
 	//  Associate model dependency as needed
 	modelLinks := make([]component.Link, 1)
 
 	// Independent Models
-	modelLinks[0] = component.Link{InputDataLocation: rasBCs[0], OutputDataLocation: hsmoutputs[0]}
+	modelLinks[0] = component.Link{InputDataLocation: rminputs[0], OutputDataLocation: hsmoutputs[0]}
+	// modelLinks[1] = component.Link{InputDataLocation: rminputs[0], OutputDataLocation: rmoutputs[0]}
 	ml := component.ModelLinks{Links: modelLinks}
 
 	// Dependent Models
@@ -327,8 +328,8 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 		ModelList:                    models,
 		EventGenerator:               eg,
 		LifecycleTimeWindow:          tw,
-		TotalRealizations:            3,
-		LifecyclesPerRealization:     2,
+		TotalRealizations:            2,
+		LifecyclesPerRealization:     1,
 		InitialRealizationSeed:       1234,
 		InitialEventSeed:             1234,
 		Outputdestination:            testSettings.OutputDataDir,
@@ -343,9 +344,10 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	}
 
 	// Compute
-	// err = rm.Compute()
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	var placeholderOptions option.Options
+	err = rp.Compute(rm, placeholderOptions)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 }

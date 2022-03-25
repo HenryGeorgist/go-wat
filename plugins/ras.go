@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,6 +18,14 @@ import (
 )
 
 type RasPlugin struct {
+}
+
+type RasBCIndex struct {
+	BCLineIDX   int `json:"bcline_idx"`
+	IntervalIDX int `json:"interval_idx"`
+	// StepsIDX           int `json:"steps_idx"`
+	HydrographStartIDX int `json:"hydrograph_start_idx"`
+	HydrographStopIDX  int `json:"hydrograph_stop_idx"`
 }
 
 type RasBoundaryConditions struct {
@@ -113,6 +122,74 @@ func extractHydrograph(ss []string) ([]float64, error) {
 }
 
 // hecRasBCs is a placeholder utility funciton for reading data from models
+func hecRasBCLineIndices(rm config.RasModelInfo) ([]RasBCIndex, error) {
+
+	var rbcidx []RasBCIndex
+	fs, err := filestore.NewFileStore(filestore.BlockFSConfig{})
+	if err != nil {
+		return rbcidx, err
+	}
+
+	modelData, err := tools.NewRasModel(rm.ProjectFilePath, fs)
+	if err != nil {
+		return rbcidx, err
+	}
+
+	for _, file := range modelData.Metadata.PlanFiles {
+
+		lineBytes, err := ioutil.ReadFile(rm.BasePath + "." + file.FlowFile)
+		if err != nil {
+			return rbcidx, err
+		}
+
+		lines := strings.Split(string(lineBytes), "\n")
+
+		for i, line := range lines {
+			match, err := regexp.MatchString("=", line)
+			if err != nil {
+				return rbcidx, err
+			}
+
+			if match {
+				lineData := strings.Split(line, "=")
+				var bcInfo RasBCIndex
+
+				switch lineData[0] {
+				// Todo: make this work on any model, not just muncie!
+				case "Boundary Location":
+					nextLine := strings.Split(lines[i+1], "=")[0]
+
+					if nextLine == "Interval" {
+
+						stepsNumeric, err := extractNumberTimeSteps(lines[i+2])
+						if err != nil {
+							return rbcidx, err
+						}
+
+						bcInfo.BCLineIDX = i
+						bcInfo.IntervalIDX = i + 1
+						// bcInfo.StepsIDX = i + 2
+						bcInfo.HydrographStartIDX = i + 3
+						bcInfo.HydrographStopIDX = int(math.Ceil(float64(stepsNumeric) / 10))
+						rbcidx = append(rbcidx, bcInfo)
+
+					} else {
+						continue
+					}
+				}
+			}
+		}
+
+	}
+
+	// Configured to use the muncie model for demo purposes only
+	// grabbing the firstBC info from u01 | p04, using hard coded flows
+	return rbcidx, nil
+
+}
+
+// hecRasBCs is a placeholder utility funciton for reading data from models
+// Modify to ingest line indices
 func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
 
 	var rbc RasBoundaryConditions
@@ -229,15 +306,17 @@ func (rp RasPlugin) InputLinks(model component.Model) []component.InputDataLocat
 	ret := make([]component.InputDataLocation, 1)
 	rm, rmok := model.(RasModel)
 	if rmok {
-		rbcs, err := hecRasBCs(config.RasModelInfo{
+		// HEC-RAS Model Directory and project name
+		_, err := hecRasBCs(config.RasModelInfo{
 			BasePath:        rm.BasePath,
 			ProjectFilePath: rm.ProjectFilePath,
 		})
 		if err != nil {
+			// Todo: add error return to this method and remove panic
 			panic(err)
 		}
 		idl := component.InputDataLocation{
-			Name:      rbcs.BCLine,
+			Name:      rm.BasePath,
 			Parameter: "flow",
 			Format:    "csv",
 		}
@@ -251,14 +330,14 @@ func (rp RasPlugin) Name() string {
 	return "RAS Plugin"
 }
 
-// List output file (p*.hdf)
+// Update to U file
 func (rp RasPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
 	output := component.OutputDataLocation{
-		Name:                 model.ModelName() + " output hdf file",
+		Name:                 model.ModelName() + " output u file",
 		Parameter:            "RAS output",
-		Format:               "HDF",
-		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.hdf", model.ModelName())}, //this is not quite right
+		Format:               "txt",
+		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.txt", model.ModelName())}, //this is not quite right
 		GeneratingModelName:  model.ModelName(),
 		GeneratingPluginName: rp.Name(),
 	}
@@ -266,14 +345,137 @@ func (rp RasPlugin) OutputLinks(model component.Model) []component.OutputDataLoc
 	return ret
 }
 
+// Todo: Fix--this is not quite right
+func rightJustify(s string, n int, fill string) string {
+	if len(s) < n {
+		padLevel := n - len(s)
+		return strings.Repeat(fill, padLevel) + s
+	} else {
+		return s[:n-1]
+	}
+}
+
+func hydroArrayToRasFormat(sb []byte) (string, error) {
+	var blockArray []string       // Temporary holder for formatted string ordinates
+	var outputBlock string        // Formatted output block for insertion into ras file
+	var rasOrdinateWidth int = 8  // RAS spec
+	var ordinatesPerLine int = 10 // RAS spec
+
+	for i, lineText := range strings.Split(string(sb), "\n") {
+		// example lineText = `2019-01-03 16:01:01.000000001 -0500 EST,50046.20488749354`
+
+		lineParts := strings.Split(lineText, ",")
+
+		if i == 0 {
+			if lineParts[1] != "Flow" {
+				return outputBlock, fmt.Errorf("expected Flow in header not found")
+			}
+		} else if len(lineParts[0]) == 0 {
+			// Todo: add a data check here or elsewhere, currently skips eval from extra line at EOF
+			continue
+
+		} else if i > 0 {
+
+			ordinate, err := strconv.ParseFloat(lineParts[1], 32)
+			if err != nil {
+				return outputBlock, err
+			}
+
+			formattedNumStr := strconv.FormatFloat(ordinate, 'f', -1, 64)
+			justifiedNumStr := rightJustify(formattedNumStr, rasOrdinateWidth, " ")
+			blockArray = append(blockArray, justifiedNumStr)
+		}
+
+	}
+
+	var rowIDX int = 0
+	for _, ordinate := range blockArray {
+
+		if rowIDX > ordinatesPerLine-1 {
+			outputBlock += ordinate + "\n"
+			rowIDX = 0
+		} else {
+			outputBlock += ordinate
+			rowIDX += 1
+		}
+
+	}
+	outputBlock += "\n"
+	return outputBlock, nil
+}
+
 func (rp RasPlugin) Compute(model component.Model, options option.Options) error {
+
+	_, rmok := model.(RasModel)
+	if !rmok {
+		return fmt.Errorf("not a ras model")
+	}
+
 	links := model.ModelLinkages()
 
-	for i, link := range links.Links {
-		fmt.Println("LINK | ", i, link)
+	for _, link := range links.Links {
+
 		lcsv, linkok := link.OutputDataLocation.LinkInfo.(component.LocalCSVLink)
 		if linkok {
+
+			// read Hydrologic Sampler output provided by link
+			hsmOutputFile := options.InputSource + lcsv.Path
+			lineBytes, err := ioutil.ReadFile(hsmOutputFile)
+			if err != nil {
+				return err
+			}
+
+			formattedRasData, err := hydroArrayToRasFormat(lineBytes)
+			if err != nil {
+				return err
+			}
+
+			// Parse data
+			// write ufile
+			// Todo: remove this hardcoded file ext
+			inputFlowFile := "/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01"
+			outputFile := "/home/slawler/workbench/repos/go-wat/sample-data/Muncie.u01"
+
+			linestart := 9
+			linestop := 15
+
+			// temp solution
+			fileBytes, err := ioutil.ReadFile(inputFlowFile)
+
+			if err != nil {
+				return err
+			}
+
+			flowDataLines := strings.Split(string(fileBytes), "\n")
+			newFlowFileData := ""
+			for i, line := range flowDataLines {
+				if i < linestart-1 {
+					newFlowFileData += line
+				} else if i == linestart {
+					newFlowFileData += formattedRasData
+				} else if i > linestop {
+					newFlowFileData += line
+				} else {
+					continue
+				}
+
+			}
+
 			fmt.Println("Link ok....", lcsv)
+			f, err := os.Create(outputFile)
+			if err != nil {
+				return err
+			}
+
+			defer f.Close()
+
+			_, err = f.WriteString(newFlowFileData)
+
+			if err != nil {
+				return err
+
+			}
+
 		}
 
 	}

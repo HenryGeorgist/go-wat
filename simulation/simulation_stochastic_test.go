@@ -174,6 +174,7 @@ func TestStochasticSimulation_serialization(t *testing.T) {
 	// }
 
 }
+
 func TestStochasticSimulation_withHydrograph(t *testing.T) {
 
 	// Load Configuration data
@@ -287,7 +288,7 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 		Flows: []float64{13500, 14000, 14500, 15000, 15500, 16000, 16500, 17000, 17500, 18000, 18500, 19000,
 			19500, 20000, 20500, 21000, 21000, 21000, 21000, 21000, 21000, 20500, 20000, 19500,
 			19000, 18500, 18000, 17500, 17000, 16500, 16000, 15500, 15000, 14583.33, 14166.67, 13750,
-			13333.33, 12916.67, 1250012083.33, 11666.67, 11250, 10833.33, 10416.67, 10000, 9666.67, 9333.33,
+			13333.33, 12916.67, 12500, 12083.33, 11666.67, 11250, 10833.33, 10416.67, 10000, 9666.67, 9333.33,
 			9000, 8666.67, 8333.33, 8000, 7666.67, 7333.33, 7000, 6666.67, 6333.33, 6000, 5875, 5750, 5625,
 			5500, 5375, 5250, 5125, 5000},
 		FlowFrequency: statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10},
@@ -303,7 +304,6 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 
 	// Independent Models
 	modelLinks[0] = component.Link{InputDataLocation: rminputs[0], OutputDataLocation: hsmoutputs[0]}
-	// modelLinks[1] = component.Link{InputDataLocation: rminputs[0], OutputDataLocation: rmoutputs[0]}
 	ml := component.ModelLinks{Links: modelLinks}
 
 	// Dependent Models
@@ -317,7 +317,7 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	// Options
 
 	// Use a timewindow
-	tw := option.TimeWindow{StartTime: time.Date(2018, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2068, time.December, 31, 1, 1, 1, 1, time.Local)}
+	tw := option.TimeWindow{StartTime: time.Date(2019, 1, 1, 1, 1, 1, 1, time.Local), EndTime: time.Date(2020, time.December, 31, 1, 1, 1, 1, time.Local)}
 
 	// Use an event generator
 	eg := option.AnnualEventGenerator{}
@@ -328,24 +328,17 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 		ModelList:                    models,
 		EventGenerator:               eg,
 		LifecycleTimeWindow:          tw,
-		TotalRealizations:            2,
+		TotalRealizations:            1,
 		LifecyclesPerRealization:     1,
 		InitialRealizationSeed:       1234,
 		InitialEventSeed:             1234,
 		Outputdestination:            testSettings.OutputDataDir,
 		Inputsource:                  testSettings.InputDataDir,
-		DeleteOutputAfterRealization: false,
+		DeleteOutputAfterRealization: true,
 	}
 
 	// Compute
 	err = Compute(stochasticconfig)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Compute
-	var placeholderOptions option.Options
-	err = rp.Compute(rm, placeholderOptions)
 	if err != nil {
 		t.Fatal(err)
 	}

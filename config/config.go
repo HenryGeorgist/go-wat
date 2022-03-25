@@ -8,6 +8,7 @@ import (
 
 type RasModelInfo struct {
 	ProjectFilePath string `json:"project_file_path"`
+	UFilePath       string `json:"ufile"`
 	BasePath        string `json:"base_path"`
 }
 

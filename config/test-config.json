@@ -1,8 +1,9 @@
 {
-  "input_data_directoy": "/home/slawler/workbench/repos/go-wat/test-data/",
-  "output_data_directoy": "/home/slawler/workbench/repos/go-wat/test-data/",
+  "input_data_directoy": "/workspaces/go-wat/testdata/",
+  "output_data_directoy": "/workspaces/go-wat/testdata/",
   "ras_model_info": {
-    "base_path": "/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie",
-    "project_file_path": "/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.prj"
+    "base_path": "/workspaces/go-wat/sample-data/Muncie/Muncie.p04",
+    "project_file_path": "/workspaces/go-wat/sample-data/Muncie/Muncie.prj",
+    "ufile": "/workspaces/go-wat/sample-data/Muncie/Muncie.u01"
   }
 }

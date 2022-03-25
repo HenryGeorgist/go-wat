@@ -282,6 +282,7 @@ type RasModel struct {
 	Name             string               `json:"name"`
 	BasePath         string               `json:"basepath"`
 	ProjectFilePath  string               `json:"projectfile"`
+	UfilePath        string               `json:"unsteadyfile"`
 	ParentPluginName string               `json:"parent_plugin_name"`
 	Links            component.ModelLinks `json:"-"`
 }
@@ -406,7 +407,7 @@ func hydroArrayToRasFormat(sb []byte) (string, error) {
 
 func (rp RasPlugin) Compute(model component.Model, options option.Options) error {
 
-	_, rmok := model.(RasModel)
+	rm, rmok := model.(RasModel)
 	if !rmok {
 		return fmt.Errorf("not a ras model")
 	}
@@ -433,8 +434,8 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			// Parse data
 			// write ufile
 			// Todo: remove this hardcoded file ext
-			inputFlowFile := "/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01"
-			outputFile := "/home/slawler/workbench/repos/go-wat/sample-data/Muncie.u01"
+			inputFlowFile := rm.UfilePath //"/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01"
+			outputFile := options.OutputDestination + "/Muncie.u01"
 
 			linestart := 9
 			linestop := 15

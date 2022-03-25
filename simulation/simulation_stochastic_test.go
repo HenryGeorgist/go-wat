@@ -276,6 +276,7 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 		Name:             "Muncie",
 		BasePath:         testSettings.RasModel.BasePath,
 		ProjectFilePath:  testSettings.RasModel.ProjectFilePath,
+		UfilePath:        testSettings.RasModel.UFilePath,
 		ParentPluginName: rp.Name(),
 		Links:            component.ModelLinks{},
 	}

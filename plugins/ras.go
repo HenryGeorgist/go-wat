@@ -39,21 +39,11 @@ func (rm RasModel) ModelLinkages() component.ModelLinks {
 	return rm.Links
 }
 
-// Get input list of BC's from a plan u file...
 // Input data locations: boundary conditions names
 func (rp RasPlugin) InputLinks(model component.Model) []component.InputDataLocation {
 	ret := make([]component.InputDataLocation, 1)
 	rm, rmok := model.(RasModel)
 	if rmok {
-		// HEC-RAS Model Directory and project name
-		_, err := hecRasBCs(RasModel{
-			BasePath:        rm.BasePath,
-			ProjectFilePath: rm.ProjectFilePath,
-		})
-		if err != nil {
-			// Todo: add error return to this method and remove panic
-			panic(err)
-		}
 		idl := component.InputDataLocation{
 			Name:      rm.BasePath,
 			Parameter: "flow",
@@ -61,7 +51,6 @@ func (rp RasPlugin) InputLinks(model component.Model) []component.InputDataLocat
 		}
 		ret[0] = idl
 	}
-
 	return ret
 }
 

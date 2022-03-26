@@ -6,13 +6,6 @@ import (
 	"os"
 )
 
-// type RasModelInfo struct {
-// 	Name
-// 	ProjectFilePath string `json:"project_file_path"`
-// 	UFilePath       string `json:"ufile"`
-// 	BasePath        string `json:"base_path"`
-// }
-
 type TestSettings struct {
 	InputDataDir  string `json:"input_data_directoy"`
 	OutputDataDir string `json:"output_data_directoy"`

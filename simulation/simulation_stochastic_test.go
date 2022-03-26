@@ -271,16 +271,6 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	activePlugins[1] = rp
 	programOrder := component.ProgramOrder{Plugins: activePlugins}
 
-	// Create simulation models
-	// rm := plugins.RasModel{
-	// 	Name:             "Muncie",
-	// 	BasePath:         testSettings.RasModel.BasePath,
-	// 	ProjectFilePath:  testSettings.RasModel.ProjectFilePath,
-	// 	UfilePath:        testSettings.RasModel.UFilePath,
-	// 	ParentPluginName: rp.Name(),
-	// 	Links:            component.ModelLinks{},
-	// }
-
 	rm, err := plugins.NewRasModel(testSettings.RasModel)
 	if err != nil {
 		t.Fatal(err)
@@ -332,7 +322,7 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 		InitialEventSeed:             1234,
 		Outputdestination:            testSettings.OutputDataDir,
 		Inputsource:                  testSettings.InputDataDir,
-		DeleteOutputAfterRealization: true,
+		DeleteOutputAfterRealization: false,
 	}
 
 	// Compute

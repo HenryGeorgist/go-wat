@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -49,8 +50,20 @@ func StartConainer(imageWithTag string) (string, error) {
 	return resp.ID, err
 }
 
+type ContainerParams struct {
+	InputRasModelDir string `json:"input_ras_model_dir"`
+	ModelName        string `json:"model_name"`
+	PlanFile         string `json:"planfile"`
+	OutputHDF        string `json:"output_hdf"`
+}
+
+func (cp ContainerParams) DirName() string {
+	_, dirName := filepath.Split(cp.InputRasModelDir)
+	return dirName
+}
+
 // RunSimInContainer uses system os to manage containers ...option 2
-func RunSimInContainer(imageWithTag string) (string, error) {
+func RunSimInContainer(cp ContainerParams) (string, error) {
 
 	rasContainer := "docker.io/lawlerseth/ras-docker-6.1-ubi8.5:latest"
 	containerID, err := StartConainer(rasContainer)
@@ -58,29 +71,31 @@ func RunSimInContainer(imageWithTag string) (string, error) {
 		return "", err
 	}
 
+	// Wait for the container to boot and come online
 	time.Sleep(5 * time.Second)
 
 	containerPath := fmt.Sprintf("%v:/sim", containerID)
 	fmt.Println(containerID, containerPath)
 
-	cmd := exec.Command("docker", "cp", "/home/slawler/workbench/repos/ras-container/sample-model", containerPath)
+	cmd := exec.Command("docker", "cp", cp.InputRasModelDir, containerPath)
 	_, err = cmd.Output()
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
 
-	cmd = exec.Command("docker", "exec", containerID, "./run-model.sh", "/sim/sample-model/", "Muncie")
+	simDir := fmt.Sprintf("/sim/%v", cp.DirName())
+
+	cmd = exec.Command("docker", "exec", containerID, "./run-model.sh", simDir, cp.ModelName)
 	_, err = cmd.Output()
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
 
-	containerOutputPath := fmt.Sprintf("%v:/sim/sample-model/Muncie.p04.tmp.hdf", containerID)
+	containerOutputPath := fmt.Sprintf("%v:/sim/%v/%v.tmp.hdf", containerID, cp.DirName(), cp.PlanFile)
 
-	cmd = exec.Command("docker", "cp", containerOutputPath,
-		"/home/slawler/workbench/repos/go-wat/test-data/realization-0/lifecycle-0/event-0/Muncie.p04.hdf")
+	cmd = exec.Command("docker", "cp", containerOutputPath, cp.OutputHDF)
 	stdout, err := cmd.Output()
 	if err != nil {
 		fmt.Println(stdout, err.Error())

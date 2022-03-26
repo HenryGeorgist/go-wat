@@ -78,8 +78,11 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 	}
 
 	links := model.ModelLinkages()
+	requiredSims := make([]ContainerParams, 0)
 
 	for _, link := range links.Links {
+
+		var simContainerParams ContainerParams
 
 		lcsv, linkok := link.OutputDataLocation.LinkInfo.(component.LocalCSVLink)
 		if linkok {
@@ -99,7 +102,7 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			// Parse data
 			inputFlowFile := rm.Ufile.Path //"/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01"
 			_, flowFile := filepath.Split(rm.Ufile.Path)
-			outputFile := options.OutputDestination + flowFile
+			outputFlowFile := options.OutputDestination + flowFile
 
 			//Todo: Make this dynamic, BCLines[0] works for Muncie, where theres is only 1 bcline
 			// Should be able to add an iterator for these cases, replacing 0 with i.
@@ -107,22 +110,32 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 				rm.Ufile.BCLines[0].OridnatesLocation.Start,
 				rm.Ufile.BCLines[0].OridnatesLocation.Stop)
 
-			f, err := os.Create(outputFile)
+			f, err := os.Create(outputFlowFile)
 			if err != nil {
 				return err
 			}
-
 			defer f.Close()
 
 			_, err = f.WriteString(newFlowFileData)
-
 			if err != nil {
 				return err
-
 			}
 
+			// Todo: read these from json...
+			simContainerParams.InputRasModelDir = "/home/slawler/workbench/repos/ras-container/sample-model"
+			simContainerParams.ModelName = "Muncie"
+			simContainerParams.PlanFile = "Muncie.p04"
+			simContainerParams.OutputHDF = "/home/slawler/workbench/repos/go-wat/test-data/realization-0/lifecycle-0/event-0/Muncie.p04.hdf"
+
+			requiredSims = append(requiredSims, simContainerParams)
 		}
 
+		// Todo: Switch this to parallel Compute here, start with one requiredSims[0]
+		// for testing, then add buffered channel
+		_, err := RunSimInContainer(requiredSims[0])
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

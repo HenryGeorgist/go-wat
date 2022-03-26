@@ -317,7 +317,7 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 		EventGenerator:               eg,
 		LifecycleTimeWindow:          tw,
 		TotalRealizations:            1,
-		LifecyclesPerRealization:     1,
+		LifecyclesPerRealization:     2,
 		InitialRealizationSeed:       1234,
 		InitialEventSeed:             1234,
 		Outputdestination:            testSettings.OutputDataDir,

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"go-wat/component"
 	"go-wat/option"
@@ -13,15 +13,12 @@ import (
 type RasPlugin struct {
 }
 
-// Name of the model (Muncie)
-// ParentPluginName (ras plugin)
-// Links are output links (what can I produce)
 type RasModel struct {
 	Name             string               `json:"name"`
 	BasePath         string               `json:"basepath"`
 	ProjectFilePath  string               `json:"projectfile"`
-	UfilePath        string               `json:"unsteadyfile"`
 	ParentPluginName string               `json:"parent_plugin_name"`
+	Ufile            RasFlowFile          `json:"unsteadyfile"`
 	Links            component.ModelLinks `json:"-"`
 }
 
@@ -100,37 +97,16 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			}
 
 			// Parse data
-			// write ufile
-			// Todo: remove this hardcoded file ext
-			inputFlowFile := rm.UfilePath //"/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01"
-			outputFile := options.OutputDestination + "/Muncie.u01"
+			inputFlowFile := rm.Ufile.Path //"/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01"
+			_, flowFile := filepath.Split(rm.Ufile.Path)
+			outputFile := options.OutputDestination + flowFile
 
-			linestart := 9
-			linestop := 14
+			//Todo: Make this dynamic, BCLines[0] works for Muncie, where theres is only 1 bcline
+			// Should be able to add an iterator for these cases, replacing 0 with i.
+			newFlowFileData, err := newUfile(inputFlowFile, formattedRasData,
+				rm.Ufile.BCLines[0].OridnatesLocation.Start,
+				rm.Ufile.BCLines[0].OridnatesLocation.Stop)
 
-			// temp solution
-			fileBytes, err := ioutil.ReadFile(inputFlowFile)
-
-			if err != nil {
-				return err
-			}
-
-			flowDataLines := strings.Split(string(fileBytes), "\n")
-			newFlowFileData := ""
-			for i, line := range flowDataLines {
-				if i < linestart-1 {
-					newFlowFileData += line
-				} else if i == linestart {
-					newFlowFileData += formattedRasData
-				} else if i > linestop {
-					newFlowFileData += line
-				} else {
-					continue
-				}
-
-			}
-
-			fmt.Println("Link ok....", lcsv)
 			f, err := os.Create(outputFile)
 			if err != nil {
 				return err

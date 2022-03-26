@@ -438,7 +438,7 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			outputFile := options.OutputDestination + "/Muncie.u01"
 
 			linestart := 9
-			linestop := 15
+			linestop := 14
 
 			// temp solution
 			fileBytes, err := ioutil.ReadFile(inputFlowFile)

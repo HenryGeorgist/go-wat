@@ -91,7 +91,7 @@ func (hsp HydrographScalerPlugin) Compute(model component.Model, options option.
 
 			outputdest := options.OutputDestination + lcsv.Path
 
-			w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+			w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE, 0600)
 
 			if err != nil {
 				fmt.Println(err)

@@ -74,7 +74,7 @@ func (s ScalarPlugin) Compute(model component.Model, options option.Options) err
 		for _, o := range outputs {
 			lcsv, _ := o.LinkInfo.(component.LocalCSVLink)
 			outputdest := options.OutputDestination + lcsv.Path
-			w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+			w, err := os.OpenFile(outputdest, os.O_WRONLY|os.O_CREATE, 0600)
 			if err != nil {
 				fmt.Println(err)
 			}

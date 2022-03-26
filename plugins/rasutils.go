@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"go-wat/config"
-
 	"github.com/USACE/filestore"
 	"github.com/USACE/mcat-ras/tools"
 )
@@ -116,7 +114,7 @@ func extractHydrograph(ss []string) ([]float64, error) {
 }
 
 // hecRasBCs is a placeholder utility funciton for reading data from models
-func hecRasBCLineIndices(rm config.RasModelInfo) ([]RasBCIndex, error) {
+func hecRasBCLineIndices(rm RasModel) ([]RasBCIndex, error) {
 
 	var rbcidx []RasBCIndex
 	fs, err := filestore.NewFileStore(filestore.BlockFSConfig{})
@@ -184,7 +182,7 @@ func hecRasBCLineIndices(rm config.RasModelInfo) ([]RasBCIndex, error) {
 
 // hecRasBCs is a placeholder utility funciton for reading data from models
 // Modify to ingest line indices
-func hecRasBCs(rm config.RasModelInfo) (RasBoundaryConditions, error) {
+func hecRasBCs(rm RasModel) (RasBoundaryConditions, error) {
 
 	var rbc RasBoundaryConditions
 	fs, err := filestore.NewFileStore(filestore.BlockFSConfig{})

@@ -272,27 +272,24 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	programOrder := component.ProgramOrder{Plugins: activePlugins}
 
 	// Create simulation models
-	rm := plugins.RasModel{
-		Name:             "Muncie",
-		BasePath:         testSettings.RasModel.BasePath,
-		ProjectFilePath:  testSettings.RasModel.ProjectFilePath,
-		UfilePath:        testSettings.RasModel.UFilePath,
-		ParentPluginName: rp.Name(),
-		Links:            component.ModelLinks{},
-	}
+	// rm := plugins.RasModel{
+	// 	Name:             "Muncie",
+	// 	BasePath:         testSettings.RasModel.BasePath,
+	// 	ProjectFilePath:  testSettings.RasModel.ProjectFilePath,
+	// 	UfilePath:        testSettings.RasModel.UFilePath,
+	// 	ParentPluginName: rp.Name(),
+	// 	Links:            component.ModelLinks{},
+	// }
 
-	// Create simulation models with test data
-	hsm := plugins.HydrographScalerModel{
-		Name:             "RASBoundary",
-		ParentPluginName: hsp.Name(),
-		TimeStep:         time.Hour,
-		Flows: []float64{13500, 14000, 14500, 15000, 15500, 16000, 16500, 17000, 17500, 18000, 18500, 19000,
-			19500, 20000, 20500, 21000, 21000, 21000, 21000, 21000, 21000, 20500, 20000, 19500,
-			19000, 18500, 18000, 17500, 17000, 16500, 16000, 15500, 15000, 14583.33, 14166.67, 13750,
-			13333.33, 12916.67, 12500, 12083.33, 11666.67, 11250, 10833.33, 10416.67, 10000, 9666.67, 9333.33,
-			9000, 8666.67, 8333.33, 8000, 7666.67, 7333.33, 7000, 6666.67, 6333.33, 6000, 5875, 5750, 5625,
-			5500, 5375, 5250, 5125, 5000},
-		FlowFrequency: statistics.LogPearsonIIIDistribution{Mean: 1.0, StandardDeviation: .01, Skew: .02, EquivalentYearsOfRecord: 10},
+	rm, err := plugins.NewRasModel(testSettings.RasModel)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(rm)
+
+	hsm, err := plugins.NewHydrographScalerModel(testSettings.HydroModel)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	// Assign links to pair models with plugins

@@ -6,22 +6,25 @@ import (
 	"os"
 )
 
-type RasModelInfo struct {
-	ProjectFilePath string `json:"project_file_path"`
-	UFilePath       string `json:"ufile"`
-	BasePath        string `json:"base_path"`
-}
+// type RasModelInfo struct {
+// 	Name
+// 	ProjectFilePath string `json:"project_file_path"`
+// 	UFilePath       string `json:"ufile"`
+// 	BasePath        string `json:"base_path"`
+// }
 
 type TestSettings struct {
-	InputDataDir  string       `json:"input_data_directoy"`
-	OutputDataDir string       `json:"output_data_directoy"`
-	RasModel      RasModelInfo `json:"ras_model_info"`
+	InputDataDir  string `json:"input_data_directoy"`
+	OutputDataDir string `json:"output_data_directoy"`
+	HydroModel    string `json:"hydro_model_info"`
+	RasModel      string `json:"ras_model_info"`
 }
 
 func LoadTestSettings() (TestSettings, error) {
 
 	var ts TestSettings
-	jsonFile, err := os.Open("../config/test-config.json")
+	// jsonFile, err := os.Open("../config/test-config.json")
+	jsonFile, err := os.Open("../config/wsl-test-config.json")
 	if err != nil {
 		return ts, nil
 	}

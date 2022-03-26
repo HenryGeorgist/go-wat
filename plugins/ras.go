@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"go-wat/component"
-	"go-wat/config"
 	"go-wat/option"
 )
 
@@ -47,7 +46,7 @@ func (rp RasPlugin) InputLinks(model component.Model) []component.InputDataLocat
 	rm, rmok := model.(RasModel)
 	if rmok {
 		// HEC-RAS Model Directory and project name
-		_, err := hecRasBCs(config.RasModelInfo{
+		_, err := hecRasBCs(RasModel{
 			BasePath:        rm.BasePath,
 			ProjectFilePath: rm.ProjectFilePath,
 		})

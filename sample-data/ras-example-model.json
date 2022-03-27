@@ -1,0 +1,17 @@
+{
+  "name": "Muncie",
+  "parent_plugin_name": "Ras Plugin",
+  "basepath": "/home/slawler/workbench/repos/go-wat/sample-data/Muncie",
+  "projectfile": "/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.prj",
+  "planfile": "/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.p04",
+  "unsteadyfile": {
+    "path": "/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01",
+    "bclines": [
+      {
+        "bc_name": "muncie-bc-1",
+        "ordinate_location": { "start": 9, "stop": 14 },
+        "type": "flow"
+      }
+    ]
+  }
+}

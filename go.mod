@@ -1,6 +1,6 @@
 module go-wat
 
-go 1.18
+go 1.17
 
 require (
 	github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20220313174032-216862a003d3

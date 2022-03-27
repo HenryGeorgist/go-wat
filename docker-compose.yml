@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  go-wat:
+    container_name: go-wat
+    build:
+      context: .
+    volumes:
+      - ./:/workspaces/go-wat
+    entrypoint: sleep 1d

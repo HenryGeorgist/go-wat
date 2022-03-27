@@ -1,0 +1,8 @@
+{
+  "user_home_dir": "/workspaces/go-wat/testdata",
+  "input_data_directoy": "test-data",
+  "output_data_directoy": "test-data",
+  "ras_model_info": "sample-data/ras-example-model.json",
+  "hydro_model_info": "sample-data/hsm-example-model.json",
+  "input_ras_model_info": "sample-model"
+}

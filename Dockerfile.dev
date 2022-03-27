@@ -1,0 +1,36 @@
+FROM debian:bullseye
+
+ENV TZ=America/New_York
+ENV PATH=/go/bin:$PATH
+ENV GOROOT=/go
+ENV GOPATH=/src/go
+ENV CGO_LDFLAGS="-L/hdf/lib"
+ENV CGO_CFLAGS="-I/hdf/include"
+ENV LD_LIBRARY_PATH=/hdf/lib
+
+COPY hdf5-1.10.7.tar.gz /hdf5-1.10.7.tar.gz
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone &&\
+    mkdir /go &&\
+    mkdir -p /src/go &&\
+    apt update &&\
+    apt -y install build-essential &&\
+    apt -y install gdal-bin gdal-data libgdal-dev &&\
+    apt -y install wget &&\
+    apt -y install curl &&\
+    wget https://golang.org/dl/go1.17.5.linux-amd64.tar.gz -P / &&\
+    tar -xvzf /go1.17.5.linux-amd64.tar.gz -C / &&\
+    apt -y install vim &&\
+    apt -y install vim-airline vim-ale vim-fugitive &&\
+    apt -y install git &&\
+    tar -xvzf /hdf5-1.10.7.tar.gz &&\ 
+    cd /hdf5-1.10.7 &&\
+    ./configure --prefix=/hdf --enable-shared --enable-ros3-vfd --enable-threadsafe --disable-hl &&\
+    make &&\
+    make install &&\    
+    apt -y install unzip &&\
+    apt -y install locales locales-all &&\
+    apt -y install powerline &&\
+    apt -y install fish &&\
+    curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish &&\
+    echo 'source $VIMRUNTIME/defaults.vim\npackadd! ale\nset number\nset tabstop=4\nset autoindent\nset cursorline\nset hlsearch\ncolo torte' > ~/.vimrc

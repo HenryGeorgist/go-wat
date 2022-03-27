@@ -1,5 +1,5 @@
 {
-  "user_home_dir": "/home/slawler/workbench/repos/go-wat",
+  "user_home_dir": "/workspaces/go-wat/testdata",
   "input_data_directoy": "test-data",
   "output_data_directoy": "test-data",
   "ras_model_info": "sample-data/ras-example-model.json",

@@ -34,8 +34,8 @@ func LoadTestSettings() (TestSettings, error) {
 	json.Unmarshal(jsonData, &ts)
 	userRootDir := filepath.FromSlash(ts.UserHomeDir)
 	ts.UserHomeDir = userRootDir
-	ts.InputDataDir = filepath.FromSlash(fmt.Sprintf("%v/%v", userRootDir, ts.InputDataDir))
-	ts.OutputDataDir = filepath.FromSlash(fmt.Sprintf("%v/%v", userRootDir, ts.OutputDataDir))
+	ts.InputDataDir = filepath.FromSlash(fmt.Sprintf("%v/%v/", userRootDir, ts.InputDataDir))
+	ts.OutputDataDir = filepath.FromSlash(fmt.Sprintf("%v/%v/", userRootDir, ts.OutputDataDir))
 	ts.HydroModel = filepath.FromSlash(fmt.Sprintf("%v/%v", userRootDir, ts.HydroModel))
 	ts.RasModel = filepath.FromSlash(fmt.Sprintf("%v/%v", userRootDir, ts.RasModel))
 

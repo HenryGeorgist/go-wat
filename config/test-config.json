@@ -1,10 +1,8 @@
 {
-  "input_data_directoy": "/workspaces/go-wat/testdata/",
-  "output_data_directoy": "/workspaces/go-wat/testdata/",
-  "ras_model_info": {
-    "base_path": "/workspaces/go-wat/sample-data/Muncie/Muncie.p04",
-    "project_file_path": "/workspaces/go-wat/sample-data/Muncie/Muncie.prj",
-    "ufile": "/workspaces/go-wat/sample-data/Muncie/Muncie.u01"
-  },
-  "hydro_model_info": "/workspaces/go-wat/sample-data/hsm-example-config.json"
+  "user_home_dir": "/home/slawler/workbench/repos/go-wat",
+  "input_data_directoy": "test-data",
+  "output_data_directoy": "test-data",
+  "ras_model_info": "sample-data/ras-example-model.json",
+  "hydro_model_info": "sample-data/hsm-example-model.json",
+  "input_ras_model_info": "sample-model"
 }

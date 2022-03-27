@@ -1,7 +1,0 @@
-{
-  "input_data_directoy": "/home/slawler/workbench/repos/go-wat/test-data/",
-  "output_data_directoy": "/home/slawler/workbench/repos/go-wat/test-data/",
-  "ras_model_info": "/home/slawler/workbench/repos/go-wat/sample-data/ras-example-model.json",
-  "hydro_model_info": "/home/slawler/workbench/repos/go-wat/sample-data/hsm-example-model.json",
-  "input_ras_model_info": "/home/slawler/workbench/repos/ras-container/sample-model"
-}

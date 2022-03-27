@@ -52,6 +52,7 @@ func StartConainer(imageWithTag string) (string, error) {
 
 type ContainerParams struct {
 	InputRasModelDir string `json:"input_ras_model_dir"`
+	UpdatedFlowFile  string `json:"updated_flow_file"`
 	ModelName        string `json:"model_name"`
 	PlanFile         string `json:"planfile"`
 	OutputHDF        string `json:"output_hdf"`
@@ -77,11 +78,15 @@ func RunSimInContainer(cp ContainerParams) (string, error) {
 
 	// Director Mapping
 	containerPath := fmt.Sprintf("%v:/sim", containerID)
-	containerOutputPath := fmt.Sprintf("%v:/sim/%v/%v.tmp.hdf", containerID, cp.DirName(), cp.PlanFile)
+	containerOutputPath := fmt.Sprintf("%v/%v/%v.tmp.hdf", containerPath, cp.DirName(), cp.PlanFile)
+	_, flowFileName := filepath.Split(cp.UpdatedFlowFile)
+	containerUpdatedFlowFilePath := fmt.Sprintf("%v/%v/%v", containerPath, cp.DirName(), flowFileName)
 	simDir := fmt.Sprintf("/sim/%v", cp.DirName())
 
 	// System Docker calls
 	copyModelInput := []string{"cp", cp.InputRasModelDir, containerPath}
+	// Todo: This replacement may need to happen not in the p.0 txt fuke but in the hdf, need to verify
+	overwriteUfile := []string{"cp", cp.UpdatedFlowFile, containerUpdatedFlowFilePath}
 	startSim := []string{"exec", containerID, "./run-model.sh", simDir, cp.ModelName}
 	copyModelOutput := []string{"cp", containerOutputPath, cp.OutputHDF}
 	// Todo: add simulation log mount or copy
@@ -89,7 +94,7 @@ func RunSimInContainer(cp ContainerParams) (string, error) {
 	removeContainer := []string{"rm", containerID}
 
 	// Dump system calls into a slice for iteration loop
-	systemCalls := [][]string{copyModelInput, startSim, copyModelOutput, stopContainer, removeContainer}
+	systemCalls := [][]string{copyModelInput, overwriteUfile, startSim, copyModelOutput, stopContainer, removeContainer}
 
 	for _, sysCall := range systemCalls {
 		fmt.Println("Syscall: ", sysCall)

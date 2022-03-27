@@ -104,7 +104,7 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			inputFlowFile := rm.Ufile.Path
 			_, flowFile := filepath.Split(rm.Ufile.Path)
 			_, planFile := filepath.Split(rm.Pfile)
-			outputFlowFile := options.OutputDestination + flowFile
+			outputFlowFile := fmt.Sprintf("%v/%v", options.OutputDestination, flowFile)
 
 			//Todo: Make this dynamic, BCLines[0] works for Muncie, where theres is only 1 bcline
 			// Should be able to add an iterator for these cases, replacing 0 with i.
@@ -126,6 +126,7 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			// Todo: read these from json...
 			simContainerParams.InputRasModelDir = rm.BasePath
 			simContainerParams.ModelName = rm.Name
+			simContainerParams.UpdatedFlowFile = outputFlowFile
 			simContainerParams.PlanFile = planFile
 			simContainerParams.OutputHDF = fmt.Sprintf("%v/%v.hdf", options.InputSource, planFile)
 

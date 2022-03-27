@@ -18,6 +18,7 @@ type RasModel struct {
 	BasePath         string               `json:"basepath"`
 	ProjectFilePath  string               `json:"projectfile"`
 	ParentPluginName string               `json:"parent_plugin_name"`
+	Pfile            string               `json:"planfile"`
 	Ufile            RasFlowFile          `json:"unsteadyfile"`
 	Links            component.ModelLinks `json:"-"`
 }
@@ -78,7 +79,7 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 	}
 
 	links := model.ModelLinkages()
-	requiredSims := make([]ContainerParams, 0)
+	// requiredSims := make([]ContainerParams, 0)
 
 	for _, link := range links.Links {
 
@@ -88,8 +89,8 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 		if linkok {
 
 			// read Hydrologic Sampler output provided by link
-			hsmOutputFile := options.InputSource + lcsv.Path
-			lineBytes, err := ioutil.ReadFile(hsmOutputFile)
+			hsmOutputCSVFile := options.InputSource + lcsv.Path
+			lineBytes, err := ioutil.ReadFile(hsmOutputCSVFile)
 			if err != nil {
 				return err
 			}
@@ -100,8 +101,9 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			}
 
 			// Parse data
-			inputFlowFile := rm.Ufile.Path //"/home/slawler/workbench/repos/go-wat/sample-data/Muncie/Muncie.u01"
+			inputFlowFile := rm.Ufile.Path
 			_, flowFile := filepath.Split(rm.Ufile.Path)
+			_, planFile := filepath.Split(rm.Pfile)
 			outputFlowFile := options.OutputDestination + flowFile
 
 			//Todo: Make this dynamic, BCLines[0] works for Muncie, where theres is only 1 bcline
@@ -122,20 +124,25 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			}
 
 			// Todo: read these from json...
-			simContainerParams.InputRasModelDir = "/home/slawler/workbench/repos/ras-container/sample-model"
-			simContainerParams.ModelName = "Muncie"
-			simContainerParams.PlanFile = "Muncie.p04"
-			simContainerParams.OutputHDF = "/home/slawler/workbench/repos/go-wat/test-data/realization-0/lifecycle-0/event-0/Muncie.p04.hdf"
+			simContainerParams.InputRasModelDir = rm.BasePath
+			simContainerParams.ModelName = rm.Name
+			simContainerParams.PlanFile = planFile
+			simContainerParams.OutputHDF = fmt.Sprintf("%v/%v.hdf", options.InputSource, planFile)
 
-			requiredSims = append(requiredSims, simContainerParams)
 		}
 
-		// Todo: Switch this to parallel Compute here, start with one requiredSims[0]
-		// for testing, then add buffered channel
-		_, err := RunSimInContainer(requiredSims[0])
+		// // for testing without ras sim
+		// _, err := runSimInContainerPreview(simContainerParams)
+		// if err != nil {
+		// 	return err
+		// }
+
+		_, err := RunSimInContainer(simContainerParams)
 		if err != nil {
 			return err
 		}
+
 	}
+
 	return nil
 }

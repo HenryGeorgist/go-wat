@@ -106,3 +106,10 @@ func RunSimInContainer(cp ContainerParams) (string, error) {
 
 	return "done", nil
 }
+
+// Dummy function for concurrency dev
+func RunSimInContainerPreview(cp ContainerParams) (string, error) {
+	time.Sleep(1 * time.Second)
+	fmt.Println("Sim Preview....")
+	return "Done", nil
+}

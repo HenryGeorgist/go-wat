@@ -22,6 +22,8 @@ func TestStochasticSimulation(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	fmt.Println(testSettings)
+
 	// Instantiate required plugins
 	spa := plugins.ScalarPlugin{}
 	spb := plugins.ScalarPlugin{}
@@ -275,7 +277,6 @@ func TestStochasticSimulation_withRAS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(rm)
 
 	hsm, err := plugins.NewHydrographScalerModel(testSettings.HydroModel)
 	if err != nil {

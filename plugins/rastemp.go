@@ -255,3 +255,48 @@ func hecRasBCs(rm RasModel) (RasBoundaryConditions, error) {
 	return rbcs[0], nil
 
 }
+
+// // Placeholder for concurrent RAS sims--Cannot include now due to events dependency on each other
+
+// func rasWorker(jobs <-chan ContainerParams, results chan<- string) {
+// 	for n := range jobs {
+// 		output, err := runSimInContainerPreview(n)
+// 		// output, err := RunSimInContainer(n)
+// 		if err != nil {
+// 			results <- fmt.Sprintf("ERROR...%v, %v", n, output)
+// 		} else {
+// 			results <- fmt.Sprintf("Success!...%v, %v", n, output)
+// 		}
+
+// 	}
+// }
+
+// // Specify Number of simultaneous sims
+// nWorkers := 2
+// nJobs := len(requiredSims)
+// message := fmt.Sprintf("Processing %v models with %v Max Concurrent Simulations:", nJobs, nWorkers)
+// fmt.Println(message)
+// jobsChan := make(chan ContainerParams, nWorkers)
+// resultsChan := make(chan string, nJobs)
+
+// // and outputs to the results channel
+// for i := 0; i < nWorkers; i++ {
+// 	go worker(jobsChan, resultsChan)
+// }
+
+// // send jobs to queue
+// for j := 0; j < nJobs; j++ {
+// 	jobsChan <- requiredSims[j]
+// }
+
+// close(jobsChan)
+
+// // pull the results out of the results channel
+// // since it is buffered, we do not have to close it, it will close when empty
+// resultsCount := 0
+// for k := 0; k < nJobs; k++ {
+// 	r := <-resultsChan
+// 	fmt.Println("r-->", r)
+// 	resultsCount++
+// }
+// fmt.Println("Results count:", resultsCount)

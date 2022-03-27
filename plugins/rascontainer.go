@@ -36,7 +36,7 @@ func StartConainer(imageWithTag string) (string, error) {
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image: imageWithTag,
-		Cmd:   []string{"sleep", "2m"},
+		Cmd:   []string{"sleep", "5m"},
 		Tty:   true,
 	}, chc, nnc, vp, "")
 	if err != nil {
@@ -55,6 +55,7 @@ type ContainerParams struct {
 	ModelName        string `json:"model_name"`
 	PlanFile         string `json:"planfile"`
 	OutputHDF        string `json:"output_hdf"`
+	OutputLog        string `json:"output_log"`
 }
 
 func (cp ContainerParams) DirName() string {
@@ -74,48 +75,33 @@ func RunSimInContainer(cp ContainerParams) (string, error) {
 	// Wait for the container to boot and come online
 	time.Sleep(5 * time.Second)
 
+	// Director Mapping
 	containerPath := fmt.Sprintf("%v:/sim", containerID)
-	fmt.Println(containerID, containerPath)
-
-	cmd := exec.Command("docker", "cp", cp.InputRasModelDir, containerPath)
-	_, err = cmd.Output()
-	if err != nil {
-		fmt.Println(err.Error())
-		return "", err
-	}
-
+	containerOutputPath := fmt.Sprintf("%v:/sim/%v/%v.tmp.hdf", containerID, cp.DirName(), cp.PlanFile)
 	simDir := fmt.Sprintf("/sim/%v", cp.DirName())
 
-	cmd = exec.Command("docker", "exec", containerID, "./run-model.sh", simDir, cp.ModelName)
-	_, err = cmd.Output()
-	if err != nil {
-		fmt.Println(err.Error())
-		return "", err
-	}
+	// System Docker calls
+	copyModelInput := []string{"cp", cp.InputRasModelDir, containerPath}
+	startSim := []string{"exec", containerID, "./run-model.sh", simDir, cp.ModelName}
+	copyModelOutput := []string{"cp", containerOutputPath, cp.OutputHDF}
+	// Todo: add simulation log mount or copy
+	stopContainer := []string{"stop", containerID}
+	removeContainer := []string{"rm", containerID}
 
-	containerOutputPath := fmt.Sprintf("%v:/sim/%v/%v.tmp.hdf", containerID, cp.DirName(), cp.PlanFile)
+	// Dump system calls into a slice for iteration loop
+	systemCalls := [][]string{copyModelInput, startSim, copyModelOutput, stopContainer, removeContainer}
 
-	cmd = exec.Command("docker", "cp", containerOutputPath, cp.OutputHDF)
-	stdout, err := cmd.Output()
-	if err != nil {
-		fmt.Println(stdout, err.Error())
-		return "", err
-	}
+	for _, sysCall := range systemCalls {
+		fmt.Println("Syscall: ", sysCall)
+		cmd := exec.Command("docker", sysCall...)
+		_, err = cmd.Output()
+		if err != nil {
+			// Comment next line to leave container running and debug via shell
+			_ = exec.Command("docker", removeContainer...)
+			fmt.Println("Terminating container due", containerID, err.Error())
+			return "", err
+		}
 
-	cmd = exec.Command("docker", "stop", containerID)
-
-	stdout, err = cmd.Output()
-	if err != nil {
-		fmt.Println(stdout, err.Error())
-		return "", err
-	}
-
-	cmd = exec.Command("docker", "rm", containerID)
-
-	stdout, err = cmd.Output()
-	if err != nil {
-		fmt.Println(stdout, err.Error())
-		return "", err
 	}
 
 	return "done", nil

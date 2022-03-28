@@ -171,6 +171,7 @@ func (cp ConsequencesPlugin) Compute(model component.Model, options option.Optio
 					terrainPath:   terrainPath,
 					inputEpsg:     int(4326),
 				}
+				rdh.Run()
 			*/
 		}
 	}

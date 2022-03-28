@@ -14,6 +14,7 @@ require (
 
 require (
 	github.com/Microsoft/go-winio v0.5.2 // indirect
+	github.com/USACE/go-consequences v0.0.0-20220215222844-0cf15f74f9ab
 	github.com/aws/aws-sdk-go v1.43.26 // indirect
 	github.com/containerd/containerd v1.6.2 // indirect
 	github.com/dewberry/gdal v0.3.2 // indirect

@@ -8,6 +8,7 @@ import (
 	"go-wat/option"
 
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-inland/main"
 )
 
 type ConsequencesPlugin struct {
@@ -140,21 +141,21 @@ func (cp ConsequencesPlugin) Compute(model component.Model, options option.Optio
 				linksAreGood += 1
 				hdfPath = link.Path
 			}
-			break
+			//break
 		case "elev":
 			link, linkok := i.OutputDataLocation.LinkInfo.(component.LocalCSVLink)
 			if linkok {
 				linksAreGood += 1
 				terrainPath = link.Path
 			}
-			break
+			//break
 		}
 	}
 	cm, cmok := model.(ConsequencesModel)
 	if cmok {
 
 		if linksAreGood == 2 {
-			_, err := hazardproviders.Init(terrainPath)
+			tcr, err := hazardproviders.Init(terrainPath)
 			if err != nil {
 				log.Printf("Error loading terrain:%s\n", err)
 				return err
@@ -162,17 +163,17 @@ func (cp ConsequencesPlugin) Compute(model component.Model, options option.Optio
 			log.Print(terrainPath)
 			log.Print(hdfPath)
 			log.Print(cm)
-			/*
-				rdh := RasDepthHazard{
-					structurePath: cm.StructurePath,
-					tcr:           &tcr,
-					outputPath:    options.OutputDestination + cm.ModelName() + ".gpkg",
-					filePath:      hdfPath,
-					terrainPath:   terrainPath,
-					inputEpsg:     int(4326),
-				}
-				rdh.Run()
-			*/
+
+			rdh := main.RasDepthHazard{
+				structurePath: cm.StructurePath,
+				tcr:           &tcr,
+				outputPath:    options.OutputDestination + cm.ModelName() + ".gpkg",
+				filePath:      hdfPath,
+				terrainPath:   terrainPath,
+				inputEpsg:     int(4326),
+			}
+			rdh.Run()
+
 		}
 	}
 	return nil

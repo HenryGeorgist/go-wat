@@ -56,18 +56,34 @@ func (rp RasPlugin) Name() string {
 	return "RAS Plugin"
 }
 
-// Update to U file
+// for a ras plugin the major output is the hdf file, many post processes require the terrain and the hdf.
+//down the road, we may want to offer additional outputs, like stage or flow at a cross section from the unsteady plan specification
+//or stored map options from the rasmapper specification.
 func (rp RasPlugin) OutputLinks(model component.Model) []component.OutputDataLocation {
 	ret := make([]component.OutputDataLocation, 0)
-	output := component.OutputDataLocation{
-		Name:                 model.ModelName() + " output u file",
-		Parameter:            "RAS output",
-		Format:               "txt",
-		LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.txt", model.ModelName())}, //this is not quite right
-		GeneratingModelName:  model.ModelName(),
-		GeneratingPluginName: rp.Name(),
+	rm, rmok := model.(RasModel)
+	if rmok {
+		_, planFile := filepath.Split(rm.Pfile)
+		terrain := component.OutputDataLocation{
+			Name:                 "Terrain",
+			Parameter:            "Elevation",
+			Format:               "geotif",
+			LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/Terrain/%v.tif", model.ModelName())}, //this is not quite right
+			GeneratingModelName:  model.ModelName(),
+			GeneratingPluginName: rp.Name(),
+		}
+		rasHDFOutput := component.OutputDataLocation{
+			Name:                 "HEC-RAS HDF output",
+			Parameter:            "Depth",
+			Format:               "HDF",
+			LinkInfo:             component.LocalCSVLink{Path: fmt.Sprintf("/%v.hdf", planFile)},
+			GeneratingModelName:  model.ModelName(),
+			GeneratingPluginName: rp.Name(),
+		}
+		ret = append(ret, terrain)
+		ret = append(ret, rasHDFOutput)
 	}
-	ret = append(ret, output)
+
 	return ret
 }
 
@@ -128,7 +144,7 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 			simContainerParams.ModelName = rm.Name
 			simContainerParams.UpdatedFlowFile = outputFlowFile
 			simContainerParams.PlanFile = planFile
-			simContainerParams.OutputHDF = fmt.Sprintf("%v/%v.hdf", options.InputSource, planFile)
+			simContainerParams.OutputHDF = fmt.Sprintf("%v/%v.hdf", options.OutputDestination, planFile)
 
 		}
 
@@ -139,6 +155,7 @@ func (rp RasPlugin) Compute(model component.Model, options option.Options) error
 		// }
 
 		_, err := RunSimInContainer(simContainerParams)
+		//TODO: ensure the terrain and the hdf are both stored in the outputdestination.
 		if err != nil {
 			return err
 		}

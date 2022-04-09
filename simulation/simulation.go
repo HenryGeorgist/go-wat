@@ -74,9 +74,10 @@ func (s StochasticConfiguration) OutputDestination() string {
 	return s.Outputdestination
 }
 
-func Compute(config Configuration) error {
+func Compute(config Configuration) ([]string, error) {
 
 	var coptions option.Options
+	var outputFiles []string
 
 	stochastic, ok := config.(StochasticConfiguration)
 	if ok {
@@ -137,7 +138,7 @@ func Compute(config Configuration) error {
 				//loop for events
 				err := stochastic.LifecycleTimeWindow.IsValid()
 				if err != nil {
-					return err
+					return outputFiles, err
 				}
 
 				events := stochastic.EventGenerator.GenerateTimeWindows(stochastic.LifecycleTimeWindow)
@@ -146,15 +147,16 @@ func Compute(config Configuration) error {
 
 					stochastic.Inputsource = fmt.Sprintf("%s/event-%v", lifecycleInputPath, eventid)
 					stochastic.Outputdestination = fmt.Sprintf("%s/event-%v", lifecycleOutputPath, eventid)
+					outputFiles = append(outputFiles, stochastic.Outputdestination)
 
 					err := os.MkdirAll(stochastic.InputSource(), os.ModePerm)
 					if err != nil {
-						return err
+						return outputFiles, err
 					}
 
 					err = os.MkdirAll(stochastic.OutputDestination(), os.ModePerm)
 					if err != nil {
-						return err
+						return outputFiles, err
 					}
 
 					//probably make one per model
@@ -176,7 +178,7 @@ func Compute(config Configuration) error {
 					}
 					outputvars, err := computeEvent(config, coptions)
 					if err != nil {
-						return err
+						return outputFiles, err
 					}
 
 					for k, v := range outputvars {
@@ -200,37 +202,10 @@ func Compute(config Configuration) error {
 
 		} //realizations
 		fmt.Println(outputvariableHistograms)
-		return nil
-
+		return outputFiles, nil
 	} else {
-		//assume deterministic
-		outputvariablesMap := make(map[string][]string)
-		deterministic, _ := config.(DeterministicConfiguration)
-
-		deo := option.DeterministicEventOptions{EventTimeWindow: deterministic.TimeWindow}
-
-		coptions = option.Options{
-			InputSource:       config.InputSource(),
-			OutputDestination: config.OutputDestination(),
-			EventOptions:      deo,
-			OutputVariables:   outputvariablesMap,
-		}
-
-		err := os.MkdirAll(config.OutputDestination(), os.ModePerm)
-		if err != nil {
-			return err
-		}
-
-		err = os.MkdirAll(config.OutputDestination(), os.ModePerm)
-		if err != nil {
-			return err
-		}
-
-		outputs, err := computeEvent(config, coptions)
-		fmt.Println(outputs)
-		return err
+		return outputFiles, nil
 	}
-
 }
 
 //computeEvent iterates over the program order and requests each plugin to compute the associated model in the model list.

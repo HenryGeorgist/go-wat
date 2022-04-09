@@ -1,0 +1,9 @@
+{
+  "user_home_dir": "/workspaces",
+  "output_data_directoy": "test-data/output",
+  "hydro_model_info": "/config/hsm-example-model.json",
+  "total_realizations": 2,
+  "lifecycles_per_realization": 3,
+  "initial_realization_seed": 1234,
+  "initial_event_seed": 1234
+}

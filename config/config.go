@@ -16,6 +16,18 @@ type TestSettings struct {
 	RasModel      string `json:"ras_model_info"`
 }
 
+type EventSettings struct {
+	UserHomeDir              string `json:"user_home_dir"`
+	InputDataDir             string `json:"input_data_directoy"`
+	OutputDataDir            string `json:"output_data_directoy"`
+	HydroModel               string `json:"hydro_model_info"`
+	RasModel                 string `json:"ras_model_info"`
+	TotalRealizations        int    `json:"total_realizations"`
+	LifecyclesPerRealization int    `json:"lifecycles_per_realization"`
+	InitialRealizationSeed   int64  `json:"initial_realization_seed"`
+	InitialEventSeed         int64  `json:"initial_event_seed"`
+}
+
 func LoadTestSettings() (TestSettings, error) {
 
 	var ts TestSettings
